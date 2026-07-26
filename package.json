@@ -1,0 +1,11 @@
+{
+  "name": "ad-creative-agent-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "test": "node scripts/build.mjs && node --test tests/*.test.mjs",
+    "build": "node scripts/build.mjs"
+  }
+}
