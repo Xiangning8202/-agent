@@ -13,4 +13,9 @@ test("deployment worker serves the app shell and module assets", async () => {
   assert.equal(module.status, 200);
   assert.match(module.headers.get("content-type"), /text\/javascript/);
   assert.match(await module.text(), /function render/);
+
+  const icon = await worker.fetch(new Request("https://example.test/src/assets/icons/image.svg"));
+  assert.equal(icon.status, 200);
+  assert.match(icon.headers.get("content-type"), /image\/svg\+xml/);
+  assert.match(await icon.text(), /^<svg[\s>]/);
 });

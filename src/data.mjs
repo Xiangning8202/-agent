@@ -1,17 +1,17 @@
 export const navItems = [
-  ["image", "图片素材生成", "图"],
-  ["video", "视频素材生成", "视"],
-  ["tasks", "任务进度", "任"],
-  ["audits", "审核管理", "审"],
-  ["library", "素材库", "库"],
-  ["knowledge", "知识库", "知"],
-  ["analytics", "素材数据", "数"],
-  ["accounts", "账号管理", "账"]
+  ["image", "图片素材生成", "./src/assets/icons/image.svg"],
+  ["video", "视频素材生成", "./src/assets/icons/video.svg"],
+  ["tasks", "任务进度", "./src/assets/icons/list-checks.svg"],
+  ["audits", "审核管理", "./src/assets/icons/shield-check.svg"],
+  ["library", "素材库", "./src/assets/icons/library.svg"],
+  ["knowledge", "知识库", "./src/assets/icons/database.svg"],
+  ["analytics", "素材数据", "./src/assets/icons/chart-no-axes-combined.svg"],
+  ["accounts", "账号管理", "./src/assets/icons/users.svg"]
 ];
 
 export const partnerNav = [
-  ["partner-assets", "授权素材", "授"],
-  ["partner-downloads", "下载记录", "下"]
+  ["partner-assets", "授权素材", "./src/assets/icons/folder-key.svg"],
+  ["partner-downloads", "下载记录", "./src/assets/icons/download.svg"]
 ];
 
 export const products = [

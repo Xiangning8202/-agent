@@ -2,11 +2,11 @@ import { products } from "./data.mjs";
 import { badge, imageUrl, pageHeader } from "./ui.mjs";
 import { getState, saveDraft, setState } from "./state.mjs";
 
-const option = (label, selected = false) => `<span class="choice ${selected ? "selected" : ""}">${label}</span>`;
+const option = (label, selected = false) => `<button type="button" class="choice ${selected ? "selected" : ""}" data-choice>${label}</button>`;
 const field = (label, value, extra = "") => `<label class="form-field"><span>${label}</span><input aria-label="${label}" value="${value}" ${extra}></label>`;
 const selectField = (label, value, options = [value]) => `<label class="form-field"><span>${label}</span><select aria-label="${label}">${options.map((item) => `<option ${item === value ? "selected" : ""}>${item}</option>`).join("")}</select></label>`;
 
-function agentPanel(type) {
+function agentPanel(type, state) {
   const isVideo = type === "video";
   return `<section class="agent-panel">
     <div class="panel-title"><div><strong>${isVideo ? "视频创意" : "创意"} Agent</strong><span class="online-dot"></span></div><button class="text-button" data-action="clear-chat">清空会话</button></div>
@@ -14,6 +14,7 @@ function agentPanel(type) {
       ${["需求理解", "智能选品", isVideo ? "创意结构" : "创意方案", "预览确认", "批量任务"].map((name, index) => `<div class="${index < (isVideo ? 3 : 1) ? "done" : ""}"><span>${index + 1}</span><small>${name}</small></div>`).join("")}
     </div>
     <div class="conversation">
+      ${state.conversationCleared ? `<div class="conversation-empty"><span class="bot-avatar">AI</span><div><strong>会话已清空</strong><p>输入新的投放需求即可重新开始。</p></div></div>` : `
       <div class="message agent"><span class="bot-avatar">AI</span><div>告诉我本次投放目标、渠道和希望生成的素材方向，我会分阶段帮你确认关键需求。</div></div>
       <div class="message user"><div>${isVideo ? "为近期热门数码商品生成10条竖版短视频，突出优惠感。" : "为近期热门数码商品做一批信息流图片，突出优惠感和点击转化。"}</div><span class="avatar small">李</span></div>
       <div class="message agent"><span class="bot-avatar">AI</span><div class="understanding"><strong>我对需求的理解</strong>
@@ -26,6 +27,7 @@ function agentPanel(type) {
         <div class="diff-row"><span>画面氛围</span><del>强促销</del><b>真实、轻促销</b></div>
         <button class="button button-soft" data-action="apply-diff">应用全部修改</button>
       </div>
+      `}
     </div>
     <div class="agent-input"><textarea aria-label="向 Agent 补充需求" placeholder="补充需求或要求 Agent 调整右侧方案…"></textarea><button class="send-button" data-action="send-agent">发送</button></div>
     <div class="agent-context" data-testid="agent-context">Agent 当前使用：最近保存的方案</div>
@@ -85,7 +87,7 @@ function videoScheme() {
   ];
   return `<section class="scheme-section">
     <h3><span>视频风格</span><small>多选后由 Agent 为商品分配一个风格</small></h3>
-    <div class="landing-row">${option("商品展示", true)}${option("对比分析", true)}${option("场景种草")}${option("问题解决")}<button class="button button-soft">确认风格</button></div>
+    <div class="landing-row">${option("商品展示", true)}${option("对比分析", true)}${option("场景种草")}${option("问题解决")}<button class="button button-soft" data-action="confirm-style">确认风格</button></div>
   </section>
   <section class="scheme-section">
     <h3><span>视频创意结构</span><small>整体叙事方向</small></h3>
@@ -97,23 +99,23 @@ function videoScheme() {
     </div>
   </section>
   <section class="scheme-section">
-    <h3><span>分镜脚本</span><button class="text-button">收起</button></h3>
-    <div class="table-wrap"><table><thead><tr><th>镜头</th><th>时长</th><th>镜头目标</th><th>画面</th><th>字幕</th><th>口播</th></tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <h3><span>分镜脚本</span><button class="text-button" data-action="toggle-storyboard">收起</button></h3>
+    <div class="table-wrap" data-storyboard><table><thead><tr><th>镜头</th><th>时长</th><th>镜头目标</th><th>画面</th><th>字幕</th><th>口播</th></tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
   </section>
   <section class="scheme-section">
     <h3><span>视频组件配置</span><small>用于最终工程合成</small></h3>
     <div class="component-grid">
-      ${selectField("首帧", "优惠反差首帧")}
-      ${selectField("数字人", "清爽青年")}
-      ${selectField("品牌", "平台品牌")}
-      ${selectField("Logo位置", "右上角")}
-      ${selectField("标签", "优惠感")}
-      ${selectField("BGM", "轻快电子")}
-      ${selectField("转场", "快速推拉")}
-      ${selectField("音色", "活力男声")}
-      ${selectField("字幕模板", "重点词高亮")}
-      ${selectField("字幕渲染", "逐字出现")}
-      ${selectField("CTA展示方式", "尾帧行动按钮")}
+      ${selectField("首帧", "优惠反差首帧", ["优惠反差首帧", "商品特写首帧", "真实场景首帧"])}
+      ${selectField("数字人", "清爽青年", ["清爽青年", "专业讲解员", "不使用数字人"])}
+      ${selectField("品牌", "平台品牌", ["平台品牌", "频道品牌", "商品品牌"])}
+      ${selectField("Logo位置", "右上角", ["左上角", "左下角", "右上角", "右下角", "弱化透出"])}
+      ${selectField("标签", "优惠感", ["优惠感", "科技感", "年轻化", "不使用标签"])}
+      ${selectField("BGM", "轻快电子", ["轻快电子", "温暖治愈", "动感节奏", "不使用BGM"])}
+      ${selectField("转场", "快速推拉", ["快速推拉", "淡入淡出", "硬切", "无转场"])}
+      ${selectField("音色", "活力男声", ["活力男声", "清晰女声", "沉稳男声"])}
+      ${selectField("字幕模板", "重点词高亮", ["重点词高亮", "简洁白字", "品牌色描边"])}
+      ${selectField("字幕渲染", "逐字出现", ["逐字出现", "整句出现", "重点词弹入"])}
+      ${selectField("CTA展示方式", "尾帧行动按钮", ["尾帧行动按钮", "口播加字幕", "全程弱提示"])}
     </div>
   </section>`;
 }
@@ -125,13 +127,13 @@ function summary(type) {
 export function renderGeneration(type, state = getState()) {
   const video = type === "video";
   const title = video ? "视频素材生成" : "图片素材生成";
-  return `${pageHeader(title, video ? "通过结构化创意与分镜脚本，生成可审核、可合成的视频广告素材" : "用自然语言描述投放诉求，Agent 将协助完成需求确认、智能选品与创意方案配置", '<button class="guide-button">查看操作指南</button>')}
+  return `${pageHeader(title, video ? "通过结构化创意与分镜脚本，生成可审核、可合成的视频广告素材" : "用自然语言描述投放诉求，Agent 将协助完成需求确认、智能选品与创意方案配置", '<button class="guide-button" data-action="guide">查看操作指南</button>')}
   <div class="mode-tabs"><button class="${state.generationMode === "native" ? "active" : ""}" data-mode="native">AI原生素材</button><button class="${state.generationMode === "replica" ? "active" : ""}" data-mode="replica">爆款复刻素材</button></div>
   ${state.generationMode === "replica" ? `<div class="replica-strip"><div><strong>${video ? "上传参考视频或输入视频 URL" : "上传 JPG、PNG 或输入图片 URL"}</strong><p>模型将解析结构、文案、主体、风格和风险点，低置信字段需要运营确认。</p></div><button class="button button-primary" data-action="parse-replica">上传并解析</button></div>` : ""}
   <div class="generation-grid">
-    ${agentPanel(type)}
+    ${agentPanel(type, state)}
     <section class="scheme-panel">
-      <div class="panel-title"><div><strong>${video ? "AI视频方案" : "AI素材方案"}</strong>${badge("草稿 · 待确认", "orange")}</div><button class="text-button">查看字段说明</button></div>
+      <div class="panel-title"><div><strong>${video ? "AI视频方案" : "AI素材方案"}</strong>${badge("草稿 · 待确认", "orange")}</div><button class="text-button" data-action="field-help">查看字段说明</button></div>
       <div class="scheme-scroll">${basicFields(type)}${landingSection()}${video ? videoScheme() : imageScheme()}</div>
       <div class="scheme-actions"><span>需求确认后可生成预览</span><button class="button button-outline" data-action="save-draft">保存草稿</button><button class="button button-primary" data-action="preview">生成1个预览${video ? "视频" : "素材"}</button></div>
       ${summary(type)}
@@ -142,8 +144,8 @@ export function renderGeneration(type, state = getState()) {
 
 function productModal() {
   return `<div class="overlay"><section class="modal large" role="dialog" aria-modal="true" aria-labelledby="product-title"><div class="modal-head"><div><h2 id="product-title">管理商品 List</h2><p>本任务共 8 个商品，页面展示示例商品</p></div><button class="close-button" data-action="close-overlay">×</button></div>
-    <div class="modal-tools"><input aria-label="搜索商品" placeholder="按商品标题搜索召回"><button class="button button-outline">搜索商品</button><button class="button button-outline">下载 Excel</button></div>
-    <table><thead><tr><th>商品ID</th><th>商品标题</th><th>类目</th><th>来源</th><th>推荐原因</th><th>操作</th></tr></thead><tbody>${products.map((item) => `<tr><td>${item.id}</td><td>${item.name}</td><td>${item.category}</td><td>${item.origin === "agent" ? badge("Agent推荐", "blue") : badge("人工添加", "green")}</td><td>${item.reason}</td><td><button class="link-button">删除</button></td></tr>`).join("")}</tbody></table>
+    <div class="modal-tools"><input aria-label="搜索商品" placeholder="按商品标题搜索召回"><button class="button button-outline" data-action="search-product">搜索商品</button><button class="button button-outline" data-action="download-products">下载 Excel</button></div>
+    <table><thead><tr><th>商品ID</th><th>商品标题</th><th>类目</th><th>来源</th><th>推荐原因</th><th>操作</th></tr></thead><tbody>${products.map((item) => `<tr data-product-name="${item.name}"><td>${item.id}</td><td>${item.name}</td><td>${item.category}</td><td>${item.origin === "agent" ? badge("Agent推荐", "blue") : badge("人工添加", "green")}</td><td>${item.reason}</td><td><button class="link-button" data-action="remove-product">删除</button></td></tr>`).join("")}</tbody></table>
     <div class="modal-foot"><button class="button button-outline" data-action="close-overlay">取消</button><button class="button button-primary" data-action="close-overlay">确认商品清单</button></div></section></div>`;
 }
 
@@ -151,7 +153,12 @@ function previewModal(type) {
   const video = type === "video";
   return `<div class="overlay"><section class="modal preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-title"><div class="modal-head"><div><h2 id="preview-title">${video ? "视频" : "图片"}预览素材</h2><p>Agent 推荐代表商品：轻薄旗舰笔记本，可在生成前更换</p></div><button class="close-button" data-action="close-overlay">×</button></div>
     <div class="preview-body"><img src="${imageUrl(video ? "video-ad-preview" : "image-ad-preview", 900, 560)}" alt="代表商品预览素材"><div class="preview-notes"><strong>预览检查</strong><ul><li>优惠利益点表达清楚</li><li>Logo 位于媒体安全区</li><li>未发现绝对化低价表达</li></ul>${badge("预计通过率 87%", "green")}</div></div>
-    <div class="modal-foot"><button class="button button-outline">更换代表商品</button><button class="button button-outline" data-action="close-overlay">返回修改方案</button><button class="button button-primary" data-action="start-batch">确认预览并开始批量任务</button></div></section></div>`;
+    <div class="modal-foot"><button class="button button-outline" data-action="change-product">更换代表商品</button><button class="button button-outline" data-action="close-overlay">返回修改方案</button><button class="button button-primary" data-action="start-batch">确认预览并开始批量任务</button></div></section></div>`;
+}
+
+function infoModal(kind) {
+  const guide = kind === "guide";
+  return `<div class="overlay"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="info-title"><div class="modal-head"><div><h2 id="info-title">${guide ? "素材生成操作指南" : "方案字段说明"}</h2><p>${guide ? "按以下步骤完成一次可追溯的素材任务" : "字段可人工编辑，也可由 Agent 提议修改"}</p></div><button class="close-button" data-action="close-overlay">×</button></div><div class="info-list">${guide ? `<div><b>1</b><span><strong>描述投放需求</strong><small>说明目标、渠道、媒体和素材方向</small></span></div><div><b>2</b><span><strong>确认商品与方案</strong><small>检查 Agent 选品和结构化字段</small></span></div><div><b>3</b><span><strong>预览后批量生成</strong><small>确认代表素材，再创建批量任务</small></span></div>` : `<dl class="detail-list"><dt>只读字段</dt><dd>由渠道和媒体规格自动推导</dd><dt>方案字段</dt><dd>人工编辑后以右侧当前值为准</dd><dt>Agent 建议</dt><dd>只有点击“应用修改”才写入方案</dd><dt>保存草稿</dt><dd>保存后 Agent 才会使用最新方案上下文</dd></dl>`}</div><div class="modal-foot"><button class="button button-primary" data-action="close-overlay">知道了</button></div></section></div>`;
 }
 
 export function bindGeneration(type) {
@@ -161,10 +168,27 @@ export function bindGeneration(type) {
   document.querySelector('[data-action="preview"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = previewModal(type); bindOverlay(); });
   document.querySelector('[data-action="parse-replica"]')?.addEventListener("click", () => setState({ toast: "解析完成：3 个低置信字段已标记，右侧方案已更新" }));
   document.querySelector('[data-action="apply-diff"]')?.addEventListener("click", () => setState({ toast: "已应用 2 项 Agent 修改" }));
-  document.querySelector('[data-action="send-agent"]')?.addEventListener("click", () => setState({ toast: "Agent 已收到补充需求，正在生成字段差异" }));
+  document.querySelector('[data-action="send-agent"]')?.addEventListener("click", () => setState({ conversationCleared: false, toast: "Agent 已收到补充需求，正在生成字段差异" }));
+  document.querySelector('[data-action="clear-chat"]')?.addEventListener("click", () => setState({ conversationCleared: true, toast: "会话已清空，可重新输入需求" }));
+  document.querySelector('[data-action="guide"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = infoModal("guide"); bindOverlay(); });
+  document.querySelector('[data-action="field-help"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = infoModal("fields"); bindOverlay(); });
+  document.querySelector('[data-action="confirm-style"]')?.addEventListener("click", () => setState({ toast: "视频风格已确认，Agent 将按商品自动分配" }));
+  document.querySelector('[data-action="toggle-storyboard"]')?.addEventListener("click", (event) => {
+    const storyboard = document.querySelector("[data-storyboard]");
+    storyboard?.classList.toggle("collapsed");
+    event.currentTarget.textContent = storyboard?.classList.contains("collapsed") ? "展开" : "收起";
+  });
+  document.querySelectorAll("[data-choice]").forEach((button) => button.addEventListener("click", () => button.classList.toggle("selected")));
 }
 
 function bindOverlay() {
   document.querySelectorAll('[data-action="close-overlay"]').forEach((button) => button.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = ""; }));
   document.querySelector('[data-action="start-batch"]')?.addEventListener("click", () => setState({ route: "tasks", toast: "批量任务已创建，可在任务进度中查看" }));
+  document.querySelector('[data-action="search-product"]')?.addEventListener("click", () => {
+    const query = document.querySelector('[aria-label="搜索商品"]')?.value.trim() || "";
+    document.querySelectorAll("[data-product-name]").forEach((row) => { row.hidden = query && !row.dataset.productName.includes(query); });
+  });
+  document.querySelectorAll('[data-action="remove-product"]').forEach((button) => button.addEventListener("click", () => button.closest("tr")?.remove()));
+  document.querySelector('[data-action="download-products"]')?.addEventListener("click", () => setState({ toast: "商品清单 Excel 已生成" }));
+  document.querySelector('[data-action="change-product"]')?.addEventListener("click", () => setState({ toast: "已切换为降噪真无线耳机作为代表商品" }));
 }

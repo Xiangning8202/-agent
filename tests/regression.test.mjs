@@ -48,10 +48,11 @@ test("rendered routes do not contain unfinished placeholders or corrupted text",
 test("application entry files declare Chinese UTF-8 metadata and accessible labels", async () => {
   const index = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const app = await readFile(new URL("../src/app.mjs", import.meta.url), "utf8");
+  const ui = await readFile(new URL("../src/ui.mjs", import.meta.url), "utf8");
 
   assert.match(index, /<html lang="zh-CN">/);
   assert.match(index, /<meta charset="UTF-8"/);
   assert.match(index, /aria-live="polite"/);
-  assert.match(app, /aria-label="切换演示角色"/);
-  assert.doesNotMatch(index + app, /\uFFFD/);
+  assert.match(ui, /aria-label="切换演示角色"/);
+  assert.doesNotMatch(index + app + ui, /\uFFFD/);
 });

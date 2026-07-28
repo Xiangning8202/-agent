@@ -31,6 +31,10 @@ npm.cmd run build
 
 构建产物生成在 `dist` 目录。
 
+## 图标来源
+
+导航与工具栏图标采用 Lucide 开源 SVG，并保存在 `src/assets/icons`，因此开发和部署环境均可离线加载。Lucide 使用 ISC License，许可文本见 `src/assets/icons/LICENSE-LUCIDE.txt`。
+
 ## 当前边界
 
 - 数据与操作结果均为前端演示状态，不会写入后端。

@@ -10,8 +10,14 @@ export const initialState = {
   toast: "",
   drawer: null,
   modal: null,
+  topPanel: null,
   generationMode: "native",
+  conversationCleared: false,
+  taskType: "全部任务类型",
+  assetType: "全部",
   knowledgeType: "common",
+  knowledgeCategory: 0,
+  accountTab: "accounts",
   drafts: {},
   selectedAssets: new Set()
 };
@@ -35,7 +41,7 @@ export function subscribe(listener) {
 
 export function setRole(role) {
   if (!roles[role]) throw new Error(`Unknown role: ${role}`);
-  setState({ role, route: role === "partner" ? "partner-assets" : "image", drawer: null, modal: null });
+  setState({ role, route: role === "partner" ? "partner-assets" : "image", drawer: null, modal: null, topPanel: null });
 }
 
 export function saveDraft(key, value) {
