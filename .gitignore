@@ -3,3 +3,6 @@ node_modules/
 .env*
 .vercel/
 *.tgz
+
+# Local Netlify folder
+.netlify
