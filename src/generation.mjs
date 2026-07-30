@@ -152,8 +152,13 @@ function productModal() {
 function previewModal(type) {
   const video = type === "video";
   return `<div class="overlay"><section class="modal preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-title"><div class="modal-head"><div><h2 id="preview-title">${video ? "视频" : "图片"}预览素材</h2><p>Agent 推荐代表商品：轻薄旗舰笔记本，可在生成前更换</p></div><button class="close-button" data-action="close-overlay">×</button></div>
-    <div class="preview-body"><img src="${imageUrl(video ? "video-ad-preview" : "image-ad-preview", 900, 560)}" alt="代表商品预览素材"><div class="preview-notes"><strong>预览检查</strong><ul><li>优惠利益点表达清楚</li><li>Logo 位于媒体安全区</li><li>未发现绝对化低价表达</li></ul>${badge("预计通过率 87%", "green")}</div></div>
+    <div class="preview-body"><img src="${imageUrl(video ? "./src/assets/eval-images/IMG-005.png" : "./src/assets/eval-images/IMG-012.png", 900, 560)}" alt="代表商品预览素材"><div class="preview-notes"><strong>预览检查</strong><ul><li>优惠利益点表达清楚</li><li>Logo 位于媒体安全区</li><li>未发现绝对化低价表达</li></ul>${badge("预计通过率 87%", "green")}</div></div>
     <div class="modal-foot"><button class="button button-outline" data-action="change-product">更换代表商品</button><button class="button button-outline" data-action="close-overlay">返回修改方案</button><button class="button button-primary" data-action="start-batch">确认预览并开始批量任务</button></div></section></div>`;
+}
+
+function replicaModal(type) {
+  const video = type === "video";
+  return `<div class="overlay"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="replica-title"><div class="modal-head"><div><h2 id="replica-title">上传并解析${video ? "视频" : "图片"}参考素材</h2><p>解析结构、文案、主体、风格和风险点，确认后写入右侧方案</p></div><button class="close-button" data-action="close-overlay">×</button></div><div class="modal-body form-stack"><label>上传文件<input type="file" accept="${video ? "video/*" : "image/png,image/jpeg"}"></label><div class="replica-divider">或</div><label>参考素材 URL<input type="url" placeholder="https://example.com/reference.${video ? "mp4" : "png"}"></label><div class="note-box">${video ? "支持视频文件或可访问的视频 URL" : "支持 JPG、PNG 或可访问的图片 URL"}；低置信字段会标记为待确认。</div></div><div class="modal-foot"><button class="button button-outline" data-action="close-overlay">取消</button><button class="button button-primary" data-action="confirm-parse">开始解析</button></div></section></div>`;
 }
 
 function infoModal(kind) {
@@ -166,7 +171,10 @@ export function bindGeneration(type) {
   document.querySelector('[data-action="save-draft"]')?.addEventListener("click", () => saveDraft(type, { title: document.querySelector('[aria-label="任务名称"]')?.value, saved: true }));
   document.querySelector('[data-action="manage-products"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = productModal(); bindOverlay(); });
   document.querySelector('[data-action="preview"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = previewModal(type); bindOverlay(); });
-  document.querySelector('[data-action="parse-replica"]')?.addEventListener("click", () => setState({ toast: "解析完成：3 个低置信字段已标记，右侧方案已更新" }));
+  document.querySelector('[data-action="parse-replica"]')?.addEventListener("click", () => {
+    document.querySelector("#overlay-root").innerHTML = replicaModal(type);
+    bindOverlay();
+  });
   document.querySelector('[data-action="apply-diff"]')?.addEventListener("click", () => setState({ toast: "已应用 2 项 Agent 修改" }));
   document.querySelector('[data-action="send-agent"]')?.addEventListener("click", () => setState({ conversationCleared: false, toast: "Agent 已收到补充需求，正在生成字段差异" }));
   document.querySelector('[data-action="clear-chat"]')?.addEventListener("click", () => setState({ conversationCleared: true, toast: "会话已清空，可重新输入需求" }));
@@ -191,4 +199,5 @@ function bindOverlay() {
   document.querySelectorAll('[data-action="remove-product"]').forEach((button) => button.addEventListener("click", () => button.closest("tr")?.remove()));
   document.querySelector('[data-action="download-products"]')?.addEventListener("click", () => setState({ toast: "商品清单 Excel 已生成" }));
   document.querySelector('[data-action="change-product"]')?.addEventListener("click", () => setState({ toast: "已切换为降噪真无线耳机作为代表商品" }));
+  document.querySelector('[data-action="confirm-parse"]')?.addEventListener("click", () => setState({ toast: "解析完成：3 个低置信字段已标记，右侧方案已更新" }));
 }

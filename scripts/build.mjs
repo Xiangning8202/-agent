@@ -1,5 +1,5 @@
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -11,11 +11,12 @@ await cp(resolve(root, "src"), resolve(dist, "src"), { recursive: true });
 
 async function collectFiles(directory, prefix = "") {
   const files = {};
+  const textExtensions = new Set([".html", ".css", ".mjs", ".js", ".svg", ".txt"]);
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
     const absolutePath = resolve(directory, entry.name);
     if (entry.isDirectory()) Object.assign(files, await collectFiles(absolutePath, relativePath));
-    else files[`/${relativePath}`] = await readFile(absolutePath, "utf8");
+    else if (textExtensions.has(extname(entry.name))) files[`/${relativePath}`] = await readFile(absolutePath, "utf8");
   }
   return files;
 }

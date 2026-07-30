@@ -2,7 +2,6 @@ export const navItems = [
   ["image", "图片素材生成", "./src/assets/icons/image.svg"],
   ["video", "视频素材生成", "./src/assets/icons/video.svg"],
   ["tasks", "任务进度", "./src/assets/icons/list-checks.svg"],
-  ["audits", "审核管理", "./src/assets/icons/shield-check.svg"],
   ["library", "素材库", "./src/assets/icons/library.svg"],
   ["knowledge", "知识库", "./src/assets/icons/database.svg"],
   ["analytics", "素材数据", "./src/assets/icons/chart-no-axes-combined.svg"],
@@ -22,20 +21,28 @@ export const products = [
 ];
 
 export const tasks = [
-  { id: "TASK-20250715-0001", name: "7月数码优惠视频投放", kind: "批量生成", type: "短视频", owner: "张小野", department: "品牌市场部", created: "07-15 10:23", count: "7 / 10", progress: 68, status: "生成中", tone: "blue" },
-  { id: "TASK-20250715-0002", name: "清凉夏日家电预览方案", kind: "预览生成", type: "短视频", owner: "李思远", department: "品牌市场部", created: "07-15 09:58", count: "1 / 1", progress: 100, status: "待审核", tone: "orange" },
-  { id: "TASK-20250715-0003", name: "3C配件主图批量生成", kind: "批量生成", type: "图片", owner: "王雨桐", department: "品牌市场部", created: "07-15 09:37", count: "14 / 20", progress: 70, status: "部分完成", tone: "orange" },
-  { id: "TASK-20250714-0045", name: "618返场活动视频投放", kind: "批量生成", type: "短视频", owner: "陈宇航", department: "增长运营中心", created: "07-14 16:42", count: "15 / 15", progress: 100, status: "生成完成", tone: "green" },
-  { id: "TASK-20250714-0031", name: "数码配件视频素材批量", kind: "批量生成", type: "短视频", owner: "张小野", department: "品牌市场部", created: "07-14 11:05", count: "0 / 12", progress: 0, status: "生成失败", tone: "red" }
+  { id: "TASK-20250715-0001", name: "7月数码优惠视频投放", kind: "批量生成", type: "短视频", owner: "张小野", department: "品牌市场部", created: "07-15 10:23", count: "7 / 10", progress: 68, status: "生成中", tone: "blue", auditStatus: "部分素材审核中", auditCounts: [2, 3, 2, 0] },
+  { id: "TASK-20250715-0002", name: "清凉夏日家电预览方案", kind: "预览生成", type: "短视频", owner: "李思远", department: "品牌市场部", created: "07-15 09:58", count: "1 / 1", progress: 100, status: "待审核", tone: "orange", auditStatus: "待审核", auditCounts: [1, 0, 0, 0] },
+  { id: "TASK-20250715-0003", name: "3C配件主图批量生成", kind: "批量生成", type: "图片", owner: "王雨桐", department: "品牌市场部", created: "07-15 09:37", count: "14 / 20", progress: 70, status: "部分完成", tone: "orange", auditStatus: "部分素材已提交", auditCounts: [3, 4, 6, 1] },
+  { id: "TASK-20250714-0045", name: "618返场活动视频投放", kind: "批量生成", type: "短视频", owner: "陈宇航", department: "增长运营中心", created: "07-14 16:42", count: "15 / 15", progress: 100, status: "生成完成", tone: "green", auditStatus: "审核完成", auditCounts: [0, 0, 14, 1] },
+  { id: "TASK-20250714-0031", name: "数码配件视频素材批量", kind: "批量生成", type: "短视频", owner: "张小野", department: "品牌市场部", created: "07-14 11:05", count: "0 / 12", progress: 0, status: "生成失败", tone: "red", auditStatus: "未提交审核", auditCounts: [0, 0, 0, 0] }
 ];
 
 export const assets = [
-  { id: "IMG-20250712-00123", title: "夏日海岛度假酒店", task: "7月数码优惠图片投放", type: "图片", channel: "信息流", media: "抖音", status: "投放中", tone: "green", seed: "island-resort", ctr: "3.8%", spend: "¥12,480", cpa: "¥36.2" },
-  { id: "VID-20250710-00056", title: "夏日促销空调活动", task: "夏日促销空调活动", type: "视频", channel: "信息流", media: "快手", status: "已导出待投放", tone: "blue", seed: "summer-appliance", ctr: "3.2%", spend: "¥14,892", cpa: "¥19.6" },
-  { id: "IMG-20250711-00345", title: "真无线耳机种草图", task: "数码新品推荐", type: "图片", channel: "信息流", media: "腾讯广告", status: "已入库待投放", tone: "blue", seed: "wireless-earbuds", ctr: "3.3%", spend: "¥15,632", cpa: "¥18.9" },
-  { id: "VID-20250709-00018", title: "城市夜跑品牌视频", task: "运动装备促销视频", type: "视频", channel: "信息流", media: "抖音", status: "表现优良", tone: "green", seed: "city-running", ctr: "4.6%", spend: "¥21,560", cpa: "¥15.8" },
-  { id: "IMG-20250708-00077", title: "护肤精华新品主图", task: "美妆新品推广", type: "图片", channel: "信息流", media: "巨量引擎", status: "投放中", tone: "green", seed: "skincare-serum", ctr: "4.1%", spend: "¥18,201", cpa: "¥22.4" },
-  { id: "VID-20250707-00011", title: "桌面办公好物推荐", task: "办公好物推荐", type: "视频", channel: "DSP", media: "百度", status: "已下线归档", tone: "gray", seed: "desk-lamp", ctr: "2.6%", spend: "¥9,420", cpa: "¥41.3" }
+  { id: "IMG-001", title: "18日领券日·平台大促", task: "会员领券日图片批量", taskId: "TASK-20250715-0003", type: "图片", channel: "信息流", media: "抖音", status: "投放中", tone: "green", source: "./src/assets/eval-images/IMG-001.png", ctr: "4.8%", spend: "¥18,480", cpa: "¥16.2" },
+  { id: "IMG-002", title: "外卖一折起·家庭聚餐", task: "即时零售暑期投放", taskId: "TASK-20250715-0003", type: "图片", channel: "信息流", media: "快手", status: "表现优良", tone: "green", source: "./src/assets/eval-images/IMG-002.png", ctr: "5.2%", spend: "¥23,892", cpa: "¥13.6" },
+  { id: "IMG-003", title: "球场拼速度·平台快一步", task: "赛事热点即时零售", taskId: "TASK-20250715-0003", type: "图片", channel: "信息流", media: "腾讯广告", status: "投放中", tone: "green", source: "./src/assets/eval-images/IMG-003.png", ctr: "4.3%", spend: "¥15,632", cpa: "¥18.9" },
+  { id: "IMG-004", title: "会员超多权益", task: "会员权益说明素材", taskId: "TASK-20250715-0003", type: "图片", channel: "信息流", media: "巨量引擎", status: "已入库待投放", tone: "blue", source: "./src/assets/eval-images/IMG-004.png", ctr: "3.7%", spend: "¥9,560", cpa: "¥21.8" },
+  { id: "IMG-005", title: "欢庆新春年货节", task: "春节年货节大促", taskId: "TASK-20250715-0003", type: "图片", channel: "信息流", media: "抖音", status: "表现优良", tone: "green", source: "./src/assets/eval-images/IMG-005.png", ctr: "6.1%", spend: "¥31,201", cpa: "¥11.4" },
+  { id: "IMG-006", title: "买药有保障·药店满减", task: "医药健康频道活动", taskId: "TASK-20250715-0003", type: "图片", channel: "DSP", media: "百度", status: "已导出待投放", tone: "blue", source: "./src/assets/eval-images/IMG-006.png", ctr: "3.5%", spend: "¥8,420", cpa: "¥24.3" },
+  { id: "IMG-007", title: "夏日品牌欢迎页", task: "夏日品牌心智活动", taskId: "TASK-20250715-0003", type: "图片", channel: "种草", media: "腾讯广告", status: "已入库待投放", tone: "blue", source: "./src/assets/eval-images/IMG-007.png", ctr: "3.9%", spend: "¥12,320", cpa: "¥20.1" },
+  { id: "IMG-008", title: "城市品质生活频道", task: "本地生活频道拉新", taskId: "TASK-20250715-0003", type: "图片", channel: "种草", media: "快手", status: "投放中", tone: "green", source: "./src/assets/eval-images/IMG-008.png", ctr: "4.4%", spend: "¥17,880", cpa: "¥17.5" },
+  { id: "IMG-009", title: "好久不见·回流唤醒", task: "沉默用户召回活动", taskId: "TASK-20250715-0003", type: "图片", channel: "信息流", media: "腾讯广告", status: "已导出待投放", tone: "blue", source: "./src/assets/eval-images/IMG-009.png", ctr: "4.0%", spend: "¥11,420", cpa: "¥19.3" },
+  { id: "IMG-010", title: "急需商品即时送达", task: "多品类即时零售", taskId: "TASK-20250715-0003", type: "图片", channel: "信息流", media: "抖音", status: "表现优良", tone: "green", source: "./src/assets/eval-images/IMG-010.png", ctr: "5.7%", spend: "¥27,640", cpa: "¥12.9" },
+  { id: "IMG-011", title: "摇一摇解锁今日惊喜", task: "互动玩法促活素材", taskId: "TASK-20250715-0003", type: "图片", channel: "厂商", media: "百度", status: "已入库待投放", tone: "blue", source: "./src/assets/eval-images/IMG-011.png", ctr: "3.6%", spend: "¥7,920", cpa: "¥22.7" },
+  { id: "IMG-012", title: "今日热门好物", task: "多品类热销榜单", taskId: "TASK-20250715-0003", type: "图片", channel: "信息流", media: "巨量引擎", status: "投放中", tone: "green", source: "./src/assets/eval-images/IMG-012.png", ctr: "4.9%", spend: "¥19,820", cpa: "¥15.6" },
+  { id: "VID-001", title: "外卖一折起·竖版短视频", task: "即时零售视频批量", taskId: "TASK-20250715-0001", type: "视频", channel: "信息流", media: "抖音", status: "投放中", tone: "green", source: "./src/assets/eval-images/IMG-002.png", ctr: "4.5%", spend: "¥21,560", cpa: "¥15.8" },
+  { id: "VID-002", title: "年货节·信息流短视频", task: "春节年货节视频投放", taskId: "TASK-20250715-0001", type: "视频", channel: "信息流", media: "快手", status: "已导出待投放", tone: "blue", source: "./src/assets/eval-images/IMG-005.png", ctr: "4.1%", spend: "¥16,240", cpa: "¥18.6" }
 ];
 
 export const knowledgeRows = {

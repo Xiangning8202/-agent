@@ -43,14 +43,14 @@ const bars = (values, color = "blue") => `<div class="bar-chart" aria-label="指
 
 export function renderAnalytics(state = {}) {
   const selectedType = state.assetType || "全部";
-  const rows = assets.slice(0,5).filter((asset) => selectedType === "全部" || asset.type === selectedType);
+  const rows = assets.filter((asset) => selectedType === "全部" || asset.type === selectedType).slice(0, 5);
   return `${pageHeader("素材数据", "观察素材生产效率与投放表现，数据按日更新，不做单一创意因子归因", '<span class="updated">数据更新至 2025-07-18 10:00</span>')}
   <div class="toolbar floating">${["全部","图片","视频"].map((type) => `<button class="filter-chip ${selectedType === type ? "active" : ""}" data-analytics-type="${type}">${type}</button>`).join("")}<select><option>全部渠道</option><option>信息流</option><option>DSP</option><option>种草</option><option>厂商</option></select><select><option>全部媒体</option><option>抖音</option><option>快手</option><option>腾讯广告</option><option>巨量引擎</option><option>百度</option></select><select><option>近30天</option><option>近7天</option><option>自定义</option></select><button class="button button-primary" data-action="analytics-query">查询</button></div>
   <div class="metric-grid six">${metric("采用率", "38.6%", "较前30天 +4.2%", "red")}${metric("跑出率", "12.8%", "较前30天 +1.3%", "red")}${metric("点击率", "3.42%", "较前30天 +0.28%", "red")}${metric("总CPA", "¥42.6", "较前30天 -8.6%", "green")}${metric("审核通过率", "87.4%", "较前30天 +2.1%", "red")}${metric("首次采用耗时", "1.8天", "较前30天 -0.3天", "green")}</div>
   <div class="analytics-grid"><section class="chart-panel"><div class="section-title"><strong>核心指标趋势</strong><div>${badge("采用率", "blue")} 跑出率 CTR 总CPA</div></div>${bars([46,38,54,43,51,48,57,61,55,69,49,58,62,54],"#1768ff")}</section>
     <section class="comparison-panel"><h3>图片 / 视频效果对比</h3><div class="compare-row"><span class="type-icon">图</span><strong>图片</strong><div><small>采用率</small><b>41.2%</b></div><div><small>跑出率</small><b>13.6%</b></div><div><small>样本量</small><b>842张</b></div>${badge("样本充足","green")}</div><div class="compare-row"><span class="type-icon">视</span><strong>视频</strong><div><small>采用率</small><b>32.9%</b></div><div><small>跑出率</small><b>10.4%</b></div><div><small>样本量</small><b>383条</b></div>${badge("样本充足","green")}</div></section></div>
   <section class="data-panel analytics-table"><div class="section-title"><strong>单素材数据</strong><button class="button button-outline" data-action="export-analytics">导出</button></div><table class="data-table"><thead><tr><th>日期</th><th>素材预览</th><th>素材ID</th><th>类型</th><th>渠道/媒体</th><th>消耗（总/U1/U2/U3）</th><th>曝光（总/U1/U2/U3）</th><th>点击</th><th>CTR</th><th>U总CPA</th><th>采用状态</th><th>跑出状态</th><th>样本状态</th></tr></thead><tbody>
-  ${rows.length ? rows.map((asset) => `<tr><td>07-18</td><td><img class="tiny-thumb" src="${imageUrl(asset.seed, 100, 64)}" alt="${asset.title}"></td><td><button class="row-link" data-action="analytics-detail">${asset.id}</button></td><td>${asset.type}</td><td>${asset.channel}/${asset.media}</td><td>18,442 / 7,201 / 6,189 / 5,052</td><td>562k / 210k / 188k / 164k</td><td>20,351</td><td>${asset.ctr}</td><td>${asset.cpa}</td><td>${badge("已采用","green")}</td><td>${badge("已跑出","green")}</td><td>${badge("样本充足","blue")}</td></tr>`).join("") : '<tr><td colspan="13" class="table-empty">暂无匹配素材数据</td></tr>'}</tbody></table></section>`;
+  ${rows.length ? rows.map((asset) => `<tr><td>07-18</td><td><img class="tiny-thumb" src="${imageUrl(asset.source || asset.seed, 100, 64)}" alt="${asset.title}"></td><td><button class="row-link" data-action="analytics-detail" data-analytics-asset="${asset.id}">${asset.id}</button></td><td>${asset.type}</td><td>${asset.channel}/${asset.media}</td><td>18,442 / 7,201 / 6,189 / 5,052</td><td>562k / 210k / 188k / 164k</td><td>20,351</td><td>${asset.ctr}</td><td>${asset.cpa}</td><td>${badge("已采用","green")}</td><td>${badge("已跑出","green")}</td><td>${badge("样本充足","blue")}</td></tr>`).join("") : '<tr><td colspan="13" class="table-empty">暂无匹配素材数据</td></tr>'}</tbody></table></section><div id="overlay-root"></div>`;
 }
 
 const accountApplications = [
@@ -67,7 +67,7 @@ function accountPanel(tab) {
     return `<section class="data-panel"><table class="data-table"><thead><tr><th>下载时间</th><th>代理商</th><th>素材ID</th><th>素材名称</th><th>类型</th><th>媒体</th></tr></thead><tbody>${assets.slice(0,5).map((asset,index) => `<tr><td>2025-07-${18-index} 14:${32-index*3}</td><td>华东渠道合作商</td><td>${asset.id}</td><td>${asset.title}</td><td>${asset.type}</td><td>${asset.media}</td></tr>`).join("")}</tbody></table></section>`;
   }
   return `<section class="data-panel"><div class="toolbar"><input placeholder="姓名 / 工号 / 账号"><select><option>全部身份</option><option>管理员</option><option>正式员工</option><option>代理商</option></select><select><option>全部组织</option><option>增长运营中心</option><option>内容运营部</option><option>设计创意部</option><option>品牌市场部</option><option>渠道合作商</option></select><select><option>全部状态</option><option>正常</option><option>待审批</option><option>已冻结</option></select><button class="button button-primary" data-action="account-query">查询</button></div>
-  <table class="data-table"><thead><tr><th>姓名 / 工号</th><th>身份</th><th>组织</th><th>账号状态</th><th>最近登录</th><th>日志记录</th><th>操作</th></tr></thead><tbody>${shownAccounts.map((row) => `<tr><td><strong>${row[0]}</strong></td><td>${badge(row[1], row[1] === "管理员" ? "blue" : row[1] === "代理商" ? "orange" : "green")}</td><td>${row[2]}</td><td>${badge(row[3], statusTone(row[3]))}</td><td>${row[4]}</td><td><button class="link-button" data-action="account-log">查看日志</button></td><td><button class="link-button" data-action="edit-account">编辑</button></td></tr>`).join("")}</tbody></table></section>`;
+  <table class="data-table"><thead><tr><th>姓名 / 工号</th><th>身份</th><th>组织</th><th>账号状态</th><th>最近登录</th><th>日志记录</th><th>操作</th></tr></thead><tbody>${shownAccounts.map((row) => `<tr><td><strong>${row[0]}</strong></td><td>${badge(row[1], row[1] === "管理员" ? "blue" : row[1] === "代理商" ? "orange" : "green")}</td><td>${row[2]}</td><td>${badge(row[3], statusTone(row[3]))}</td><td>${row[4]}</td><td><button class="link-button" data-action="account-log" data-account-name="${row[0]}">查看日志</button></td><td><button class="link-button" data-action="edit-account" data-account-name="${row[0]}">编辑</button></td></tr>`).join("")}</tbody></table></section>`;
 }
 
 export function renderAccounts(state = {}) {
@@ -83,12 +83,21 @@ function partnerDrawer() {
   return `<div class="drawer-backdrop"><aside class="drawer" role="dialog" aria-modal="true"><div class="drawer-head"><div><h2>创建代理商账号</h2><p>代理商仅可查看和下载被授权素材</p></div><button class="close-button" data-close>×</button></div><div class="drawer-body form-stack"><label>渠道<select><option>信息流</option><option>DSP</option><option>种草</option><option>厂商</option></select></label><label>媒体<select><option>抖音</option><option>快手</option><option>腾讯广告</option><option>巨量引擎</option><option>百度</option></select></label><label>代理商公司名称<input placeholder="请输入公司名称"></label><label>代理商姓名<input placeholder="请输入姓名"></label><label>手机号<input placeholder="请输入手机号"></label><label>登录账号<input value="partner_hd_001"></label><label>初始密码<input value="G7m!4pKq9@#2"></label><label>备注<textarea placeholder="请输入备注"></textarea></label><div class="note-box">密码查看和修改行为将记录日志。</div></div><div class="drawer-foot"><button class="button button-outline" data-close>取消</button><button class="button button-primary" data-action="save-partner">创建账号</button></div></aside></div>`;
 }
 
+function analyticsDrawer(asset) {
+  return `<div class="drawer-backdrop"><aside class="drawer wide" role="dialog" aria-modal="true"><div class="drawer-head"><div><h2>${asset.title}</h2><p>${asset.id} · 近 7 日投放明细</p></div><button class="close-button" data-close>×</button></div><div class="drawer-body"><img class="drawer-preview" src="${imageUrl(asset.source || asset.seed)}" alt="${asset.title}"><h3>核心指标</h3><div class="mini-metrics"><div><span>CTR</span><b>${asset.ctr}</b></div><div><span>消耗</span><b>${asset.spend}</b></div><div><span>CPA</span><b>${asset.cpa}</b></div></div><h3>数据口径</h3><dl class="detail-list"><dt>采用状态</dt><dd>${badge("已采用", "green")}</dd><dt>跑出状态</dt><dd>${badge("已跑出", "green")}</dd><dt>样本状态</dt><dd>${badge("样本充足", "blue")}</dd><dt>最近回流</dt><dd>2025-07-18 10:00</dd></dl></div><div class="drawer-foot"><button class="button button-primary" data-close>关闭</button></div></aside></div>`;
+}
+
+function accountDrawer(row, mode) {
+  const isLog = mode === "log";
+  return `<div class="drawer-backdrop"><aside class="drawer" role="dialog" aria-modal="true"><div class="drawer-head"><div><h2>${isLog ? "账号操作日志" : "编辑账号"}</h2><p>${row[0]}</p></div><button class="close-button" data-close>×</button></div><div class="drawer-body">${isLog ? `<div class="version-chain"><div class="active"><b>登录成功</b><span>2025-07-18 09:32 · 企业身份认证</span></div><div><b>导出素材</b><span>2025-07-17 16:21 · IMG-001</span></div><div><b>更新知识资产</b><span>2025-07-16 11:08 · 版本 v2.1</span></div></div>` : `<div class="form-stack"><label>姓名 / 工号<input value="${row[0]}"></label><label>身份<select><option ${row[1] === "管理员" ? "selected" : ""}>管理员</option><option ${row[1] === "正式员工" ? "selected" : ""}>正式员工</option><option ${row[1] === "代理商" ? "selected" : ""}>代理商</option></select></label><label>组织<input value="${row[2]}"></label><label>账号状态<select><option ${row[3] === "正常" ? "selected" : ""}>正常</option><option ${row[3] === "已冻结" ? "selected" : ""}>已冻结</option></select></label><div class="note-box">身份、组织和冻结操作将写入账号日志。</div></div>`}</div><div class="drawer-foot"><button class="button button-outline" data-close>取消</button>${isLog ? "" : '<button class="button button-primary" data-action="save-account">保存账号</button>'}</div></aside></div>`;
+}
+
 export function renderPartnerAssets(state = {}) {
   const selectedType = state.assetType || "全部";
-  const visibleAssets = assets.slice(0,4).filter((asset) => selectedType === "全部" || asset.type === selectedType);
+  const visibleAssets = assets.filter((asset) => selectedType === "全部" || asset.type === selectedType).slice(0, 4);
   return `${pageHeader("授权素材", "仅展示当前账号仍在授权有效期内的素材")}
   <div class="partner-summary"><div><span>当前账号</span><strong>华东渠道合作商 · 赵一鸣</strong></div><div><span>可下载素材</span><strong>24 项</strong></div><div><span>最近授权</span><strong>2025-07-18 10:20</strong></div></div>
-  <section class="library-panel"><div class="toolbar"><input placeholder="素材ID / 商品名称">${["全部","图片","视频"].map((type) => `<button class="filter-chip ${selectedType === type ? "active" : ""}" data-partner-type="${type}">${type}</button>`).join("")}<select><option>全部媒体</option><option>抖音</option><option>快手</option><option>腾讯广告</option><option>巨量引擎</option><option>百度</option></select></div><div class="asset-grid">${visibleAssets.length ? visibleAssets.map((asset) => `<article class="asset-card"><div class="asset-image"><img src="${imageUrl(asset.seed,620,390)}" alt="${asset.title}"><span>${asset.type}</span></div><div class="asset-info"><strong>${asset.id}</strong><h3>${asset.title}</h3><p>授权有效期至 2026-12-31</p><button class="button button-primary partner-download">下载素材</button></div></article>`).join("") : '<p class="table-empty">暂无匹配授权素材</p>'}</div></section>`;
+  <section class="library-panel"><div class="toolbar"><input placeholder="素材ID / 商品名称">${["全部","图片","视频"].map((type) => `<button class="filter-chip ${selectedType === type ? "active" : ""}" data-partner-type="${type}">${type}</button>`).join("")}<select><option>全部媒体</option><option>抖音</option><option>快手</option><option>腾讯广告</option><option>巨量引擎</option><option>百度</option></select></div><div class="asset-grid">${visibleAssets.length ? visibleAssets.map((asset) => `<article class="asset-card"><div class="asset-image"><img src="${imageUrl(asset.source || asset.seed,620,390)}" alt="${asset.title}"><span>${asset.type}</span></div><div class="asset-info"><strong>${asset.id}</strong><h3>${asset.title}</h3><p>授权有效期至 2026-12-31</p><button class="button button-primary partner-download">下载素材</button></div></article>`).join("") : '<p class="table-empty">暂无匹配授权素材</p>'}</div></section>`;
 }
 
 export function renderPartnerDownloads() {
@@ -102,16 +111,23 @@ export function bindBackoffice(route) {
   document.querySelectorAll("[data-account-tab]").forEach((button) => button.addEventListener("click", () => setState({ accountTab: button.dataset.accountTab })));
   document.querySelectorAll('[data-action="edit-knowledge"], [data-action="new-knowledge"]').forEach((button) => button.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = knowledgeDrawer(); bindDrawer(); }));
   document.querySelector('[data-action="new-partner"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = partnerDrawer(); bindDrawer(); });
+  document.querySelectorAll('[data-action="analytics-detail"]').forEach((button) => button.addEventListener("click", () => {
+    const asset = assets.find((item) => item.id === button.dataset.analyticsAsset) || assets[0];
+    document.querySelector("#overlay-root").innerHTML = analyticsDrawer(asset);
+    bindDrawer();
+  }));
+  document.querySelectorAll('[data-action="account-log"], [data-action="edit-account"]').forEach((button) => button.addEventListener("click", () => {
+    const row = accounts.find((item) => item[0] === button.dataset.accountName) || accounts[0];
+    document.querySelector("#overlay-root").innerHTML = accountDrawer(row, button.dataset.action === "account-log" ? "log" : "edit");
+    bindDrawer();
+  }));
   document.querySelectorAll(".partner-download").forEach((button) => button.addEventListener("click", () => setState({ toast: "素材下载成功，下载记录已同步" })));
   const actionMessages = {
     "import-knowledge": "已打开知识资产导入流程",
     "export-knowledge": "知识资产清单已导出",
     "analytics-query": "数据筛选条件已应用",
     "export-analytics": "素材数据已导出",
-    "analytics-detail": "已打开素材数据详情",
     "account-query": "账号筛选条件已应用",
-    "account-log": "已打开账号操作日志",
-    "edit-account": "已打开账号编辑信息",
     "approve-account": "员工申请已通过",
     "reject-account": "员工申请已驳回"
   };
@@ -125,4 +141,5 @@ function bindDrawer() {
   document.querySelector('[data-action="save-knowledge"]')?.addEventListener("click", () => setState({ toast: "知识资产已保存为新版本 v2.2" }));
   document.querySelector('[data-action="save-partner"]')?.addEventListener("click", () => setState({ toast: "代理商账号已创建" }));
   document.querySelector('[data-action="copy-knowledge"]')?.addEventListener("click", () => setState({ toast: "知识资产副本已创建" }));
+  document.querySelector('[data-action="save-account"]')?.addEventListener("click", () => setState({ toast: "账号信息已保存并写入操作日志" }));
 }

@@ -92,9 +92,9 @@ test("analytics and partner filters render only the selected asset type", () => 
   const partnerHtml = backoffice.renderPartnerAssets({ assetType: "图片" });
 
   assert.match(analyticsHtml, /VID-/);
-  assert.doesNotMatch(analyticsHtml, /IMG-/);
+  assert.doesNotMatch(analyticsHtml, /data-analytics-asset="IMG-/);
   assert.match(partnerHtml, /IMG-/);
-  assert.doesNotMatch(partnerHtml, /VID-/);
+  assert.doesNotMatch(partnerHtml, /<strong>VID-/);
 });
 
 test("every visible dropdown offers at least two meaningful choices", () => {

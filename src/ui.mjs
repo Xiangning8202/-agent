@@ -24,6 +24,7 @@ export function emptyState(title, text) {
 }
 
 export function imageUrl(seed, width = 760, height = 480) {
+  if (String(seed).startsWith("./src/")) return String(seed);
   return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${width}/${height}`;
 }
 
@@ -45,13 +46,13 @@ const icon = (path, className = "header-icon") => `<span class="${className}" st
 
 function topPanel(name) {
   if (name === "search") {
-    return `<section class="top-popover search-popover" aria-label="全局搜索"><div class="popover-head"><strong>全局搜索</strong><button class="close-button small" data-close-top>×</button></div><label class="global-search"><span class="header-icon" style="--icon:url('./src/assets/icons/search.svg')" aria-hidden="true"></span><input autofocus placeholder="搜索任务、素材或知识资产" aria-label="全局搜索关键词"></label><div class="quick-links"><button data-route="tasks">任务进度</button><button data-route="library">素材库</button><button data-route="knowledge">知识库</button></div></section>`;
+    return `<section class="top-popover search-popover" aria-label="全局搜索"><div class="popover-head"><strong>全局搜索</strong><button class="close-button small" data-close-top>×</button></div><label class="global-search"><span class="header-icon" style="--icon:url('./src/assets/icons/search.svg')" aria-hidden="true"></span><input autofocus data-global-search placeholder="搜索任务、素材或知识资产" aria-label="全局搜索关键词"><button class="button button-primary compact" data-action="global-search">搜索</button></label><div class="quick-links"><button data-route="tasks">任务进度</button><button data-route="library">素材库</button><button data-route="knowledge">知识库</button></div></section>`;
   }
   if (name === "help") {
     return `<section class="top-popover" aria-label="帮助中心"><div class="popover-head"><strong>帮助中心</strong><button class="close-button small" data-close-top>×</button></div><div class="help-list"><button data-route="image"><b>01</b><span>创建图片素材<small>从需求到预览的完整流程</small></span></button><button data-route="video"><b>02</b><span>创建视频素材<small>配置结构、分镜和组件</small></span></button><button data-route="tasks"><b>03</b><span>处理失败任务<small>查看原因并重试失败素材</small></span></button></div></section>`;
   }
   if (name === "notifications") {
-    return `<section class="top-popover" aria-label="通知中心"><div class="popover-head"><strong>通知中心</strong><button class="close-button small" data-close-top>×</button></div><div class="notification-list"><button data-route="tasks"><span class="notice-dot blue"></span><span><b>批量任务已部分完成</b><small>3 个失败素材可单独重试 · 5分钟前</small></span></button><button data-route="audits"><span class="notice-dot orange"></span><span><b>2 个素材审核被驳回</b><small>查看原因并创建修订版本 · 18分钟前</small></span></button><button data-route="library"><span class="notice-dot green"></span><span><b>素材已完成入库</b><small>本次新增 14 个可投放素材 · 1小时前</small></span></button></div></section>`;
+    return `<section class="top-popover" aria-label="通知中心"><div class="popover-head"><strong>通知中心</strong><button class="close-button small" data-close-top>×</button></div><div class="notification-list"><button data-route="tasks"><span class="notice-dot blue"></span><span><b>批量任务已部分完成</b><small>3 个失败素材可单独重试 · 5分钟前</small></span></button><button data-route="tasks" data-open-audit-task="TASK-20250715-0003"><span class="notice-dot orange"></span><span><b>1 个素材审核被驳回</b><small>进入对应任务查看审核明细 · 18分钟前</small></span></button><button data-route="library"><span class="notice-dot green"></span><span><b>素材已完成入库</b><small>本次新增 14 个可投放素材 · 1小时前</small></span></button></div></section>`;
   }
   return "";
 }
