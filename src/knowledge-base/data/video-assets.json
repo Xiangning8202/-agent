@@ -1,0 +1,35 @@
+{
+  "group": "video",
+  "assets": [
+    {
+      "assetId": "VTPL-HOOK-001", "name": "Hook-场景-利益-CTA 竖版模板", "assetType": "video_template", "mediaType": "video", "status": "active", "version": "v2.1", "filePath": "knowledge/video/hook-benefit-cta.json", "fileFormat": "json", "fileSize": 82410, "checksum": "sha256:vtpl001", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 96, "completeness": 96 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["9:16"], "tags": ["数码", "轻促销", "快节奏", "真实"], "categories": ["手机数码", "电脑办公", "智能穿戴"], "productIds": [], "owner": "视频创意中心", "updatedAt": "2026-07-23"
+    },
+    {
+      "assetId": "VTPL-OLD-004", "name": "旧版强促销竖版模板", "assetType": "video_template", "mediaType": "video", "status": "unlisted", "version": "v1.0", "filePath": "knowledge/video/old-promo.json", "fileFormat": "json", "fileSize": 76318, "checksum": "sha256:vtpl004", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 88, "completeness": 80 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["9:16"], "tags": ["强促销"], "categories": ["all"], "productIds": [], "owner": "视频创意中心", "updatedAt": "2025-08-12"
+    },
+    {
+      "assetId": "HUM-DIGITAL-001", "name": "数码产品讲解员", "assetType": "digital_human", "mediaType": "video", "status": "active", "version": "v2.0", "filePath": "knowledge/video/human-digital-001.avatar", "fileFormat": "avatar", "fileSize": 12842020, "checksum": "sha256:hum001", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 94, "completeness": 92 }, "license": { "status": "available", "expiresAt": "2028-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["9:16"], "tags": ["数码", "专业", "真实", "产品讲解"], "categories": ["手机数码", "电脑办公"], "productIds": [], "owner": "数字人资产组", "updatedAt": "2026-07-21"
+    },
+    {
+      "assetId": "HUM-LIFE-002", "name": "年轻生活种草达人", "assetType": "digital_human", "mediaType": "video", "status": "active", "version": "v1.6", "filePath": "knowledge/video/human-life-002.avatar", "fileFormat": "avatar", "fileSize": 11980320, "checksum": "sha256:hum002", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 91, "completeness": 90 }, "license": { "status": "available", "expiresAt": "2028-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流", "种草"], "aspectRatios": ["9:16"], "tags": ["年轻", "真实", "轻促销", "场景种草"], "categories": ["手机数码", "智能穿戴"], "productIds": [], "owner": "数字人资产组", "updatedAt": "2026-07-11"
+    },
+    {
+      "assetId": "VBG-STUDIO-001", "name": "清透数码直播间背景", "assetType": "video_background", "mediaType": "video", "status": "active", "version": "v1.4", "filePath": "knowledge/video/digital-studio-bg.mp4", "fileFormat": "mp4", "fileSize": 5841020, "checksum": "sha256:vbg001", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 93, "completeness": 90 }, "license": { "status": "available", "expiresAt": "2029-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["9:16"], "tags": ["数码", "真实", "轻促销", "清透"], "categories": ["手机数码", "电脑办公", "智能穿戴"], "productIds": [], "owner": "视频创意中心", "updatedAt": "2026-07-19"
+    },
+    {
+      "assetId": "VBG-TECH-ERR", "name": "科技粒子背景损坏副本", "assetType": "video_background", "mediaType": "video", "status": "active", "version": "v1.0", "filePath": "knowledge/video/tech-particle-broken.mp4", "fileFormat": "mp4", "fileSize": 0, "checksum": "", "fileHealthy": false, "duplicateOf": "", "quality": { "resolution": 88, "completeness": 20 }, "license": { "status": "available", "expiresAt": "2029-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["9:16"], "tags": ["科技"], "categories": ["手机数码"], "productIds": [], "owner": "视频创意中心", "updatedAt": "2026-04-02"
+    },
+    {
+      "assetId": "SUB-HIGHLIGHT-001", "name": "重点词品牌色高亮字幕", "assetType": "subtitle_style", "mediaType": "video", "status": "active", "version": "v1.5", "filePath": "knowledge/video/subtitle-highlight.json", "fileFormat": "json", "fileSize": 10942, "checksum": "sha256:sub001", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 98, "completeness": 95 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["9:16"], "tags": ["清晰", "轻促销", "重点词"], "categories": ["all"], "productIds": [], "owner": "视频创意中心", "updatedAt": "2026-07-06"
+    },
+    {
+      "assetId": "SUB-HIGHLIGHT-COPY", "name": "重点词高亮字幕复制版", "assetType": "subtitle_style", "mediaType": "video", "status": "active", "version": "v1.5-copy", "filePath": "knowledge/video/subtitle-highlight-copy.json", "fileFormat": "json", "fileSize": 10942, "checksum": "sha256:sub001", "fileHealthy": true, "duplicateOf": "SUB-HIGHLIGHT-001", "quality": { "resolution": 98, "completeness": 95 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["9:16"], "tags": ["清晰", "轻促销", "重点词"], "categories": ["all"], "productIds": [], "owner": "视频创意中心", "updatedAt": "2026-07-07"
+    },
+    {
+      "assetId": "BGM-ELECTRONIC-001", "name": "轻快电子节奏 BGM", "assetType": "bgm", "mediaType": "video", "status": "active", "version": "v1.3", "filePath": "knowledge/video/light-electronic.mp3", "fileFormat": "mp3", "fileSize": 2841020, "checksum": "sha256:bgm001", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 92, "completeness": 94 }, "license": { "status": "available", "expiresAt": "2029-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["all"], "tags": ["轻快", "数码", "轻促销", "快节奏"], "categories": ["all"], "productIds": [], "owner": "音频资产组", "updatedAt": "2026-07-14"
+    },
+    {
+      "assetId": "BGM-TREND-009", "name": "热门趋势音乐片段", "assetType": "bgm", "mediaType": "video", "status": "active", "version": "v1.0", "filePath": "knowledge/video/trending-track.mp3", "fileFormat": "mp3", "fileSize": 3041980, "checksum": "sha256:bgm009", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 95, "completeness": 86 }, "license": { "status": "unavailable", "expiresAt": "2026-07-01", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["all"], "tags": ["热门", "动感"], "categories": ["all"], "productIds": [], "owner": "外部供应商", "updatedAt": "2026-06-18"
+    }
+  ]
+}

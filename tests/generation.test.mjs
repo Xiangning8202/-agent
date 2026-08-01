@@ -60,3 +60,24 @@ test("Enter submits an Agent message while Shift+Enter keeps a new line", () => 
   assert.equal(generation.isAgentSubmitKey({ key: "Enter", shiftKey: false, isComposing: true }), false);
   assert.equal(generation.isAgentSubmitKey({ key: "Space", shiftKey: false, isComposing: false }), false);
 });
+
+test("generation flow hands structured demand and selected products to the knowledge Agent", () => {
+  assert.equal(typeof generation.buildKnowledgeAgentInput, "function");
+  const selectedProducts = [{ id: "ITM-88310", name: "轻薄旗舰笔记本", category: "电脑办公" }];
+  const imageInput = generation.buildKnowledgeAgentInput("image", selectedProducts);
+  const videoInput = generation.buildKnowledgeAgentInput("video", selectedProducts);
+
+  assert.equal(imageInput.taskType, "image");
+  assert.equal(imageInput.requirement.aspectRatio, "4:5");
+  assert.equal(videoInput.requirement.aspectRatio, "9:16");
+  assert.deepEqual(imageInput.products, selectedProducts);
+});
+
+test("image and video generation expose the knowledge asset step and trigger", () => {
+  for (const type of ["image", "video"]) {
+    const html = renderGeneration(type, state);
+    assert.match(html, /知识库资产/);
+    assert.match(html, /data-action="run-knowledge-agent"/);
+    assert.match(html, /调用知识库 Agent/);
+  }
+});

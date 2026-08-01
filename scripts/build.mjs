@@ -11,7 +11,7 @@ await cp(resolve(root, "src"), resolve(dist, "src"), { recursive: true });
 
 async function collectFiles(directory, prefix = "") {
   const files = {};
-  const textExtensions = new Set([".html", ".css", ".mjs", ".js", ".svg", ".txt"]);
+  const textExtensions = new Set([".html", ".css", ".mjs", ".js", ".svg", ".txt", ".json"]);
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
     const absolutePath = resolve(directory, entry.name);
@@ -29,6 +29,7 @@ const contentTypes = {
   ".mjs": "text/javascript; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
   ".txt": "text/plain; charset=utf-8"
 };
 

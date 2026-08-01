@@ -1,4 +1,6 @@
 import { products } from "./data.mjs";
+import { loadKnowledgeCatalog, runKnowledgeAgent } from "./knowledge-base/agent.mjs";
+import { renderKnowledgeAgentModal, renderKnowledgeSupplementModal } from "./knowledge-base/ui.mjs";
 import { filterAndRankProducts, PRODUCT_QUALITY_RULES } from "./product-selection.mjs";
 import { badge, imageUrl, pageHeader } from "./ui.mjs";
 import { getState, saveDraft, setState } from "./state.mjs";
@@ -13,6 +15,20 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (character)
 
 export function isAgentSubmitKey(event) {
   return event?.key === "Enter" && !event.shiftKey && !event.isComposing;
+}
+
+export function buildKnowledgeAgentInput(type, selectedProducts = []) {
+  return {
+    taskType: type === "video" ? "video" : "image",
+    requirement: {
+      channel: "信息流",
+      brand: "平台品牌",
+      aspectRatio: type === "video" ? "9:16" : "4:5",
+      styleTags: type === "video" ? ["真实", "轻促销", "数码", "快节奏"] : ["真实", "轻促销", "数码", "商品特写"],
+      categories: [...new Set(selectedProducts.map((item) => item.category).filter(Boolean))]
+    },
+    products: selectedProducts
+  };
 }
 
 export function buildRequirementClarification(type, { clarificationResolved = false } = {}) {
@@ -86,7 +102,7 @@ function agentPanel(type, state) {
   return `<section class="agent-panel">
     <div class="panel-title"><div><strong>${isVideo ? "视频创意" : "创意"} Agent</strong><span class="online-dot"></span></div><button class="text-button" data-action="clear-chat">清空会话</button></div>
     <div class="agent-steps">
-      ${["需求理解", "智能选品", isVideo ? "创意结构" : "创意方案", "预览确认", "批量任务"].map((name, index) => `<div class="${index === 0 ? (status.confirmed ? "done" : "current") : index === 1 && status.confirmed ? "current" : ""}"><span>${index + 1}</span><small>${name}</small></div>`).join("")}
+      ${["需求理解", "智能选品", "知识库资产", isVideo ? "创意结构" : "创意方案", "预览确认", "批量任务"].map((name, index) => `<div class="${index === 0 ? (status.confirmed ? "done" : "current") : index === 1 && status.confirmed ? "current" : ""}"><span>${index + 1}</span><small>${name}</small></div>`).join("")}
     </div>
     <div class="conversation">
       ${state.conversationCleared ? `<div class="conversation-empty"><span class="bot-avatar">AI</span><div><strong>会话已清空</strong><p>输入新的投放需求即可重新开始。</p></div></div>` : `
@@ -127,6 +143,7 @@ function landingSection() {
     <div class="landing-row"><div class="inline-label">承接对象</div>${option("商品", true)}${option("频道")}</div>
     <div class="landing-row"><div class="inline-label">选品方式</div>${option("AI智能选品")}${option("按类目智能选品", true)}${option("指定商品ID")}<button class="link-button" data-action="manage-products">管理商品 List</button></div>
     <div class="landing-row"><div class="inline-label">类目选择</div>${option("手机数码", true)}${option("电脑办公", true)}${option("智能穿戴", true)}</div>
+    <div class="landing-row knowledge-trigger-row"><div class="inline-label">知识资产</div><button class="button button-soft" data-action="run-knowledge-agent">调用知识库 Agent</button><span>按当前需求与商品清单召回、过滤并校验生成资产</span></div>
   </section>`;
 }
 
@@ -216,6 +233,7 @@ export function renderGeneration(type, state = getState()) {
 }
 
 const productSelectionSession = { limit: 10, query: "", selectedIds: new Set(), excludedIds: new Set() };
+const knowledgeSession = { taskType: "image", catalog: null, input: null, result: null, quantityOverrides: {} };
 
 const scoreCell = (score) => `<span class="product-score ${score >= 90 ? "excellent" : score >= 80 ? "good" : ""}">${score.toFixed(1)}</span>`;
 
@@ -252,6 +270,14 @@ function renderProductScoreDetail(productId) {
     ["主站数据质量", item.scores.data, `销售 ${item.data.sales} · 曝光 ${item.data.exposure} · 点击 ${item.data.clicks}`, "综合权重 30%"]
   ];
   return `<div class="overlay"><section class="modal score-detail-modal" role="dialog" aria-modal="true" aria-labelledby="score-detail-title"><div class="modal-head"><div><h2 id="score-detail-title">${item.name} · 评分明细</h2><p>${item.id} · 综合推荐分 ${item.scores.overall.toFixed(1)}</p></div><button class="close-button" data-action="back-product-selection" aria-label="返回商品清单">×</button></div><div class="score-detail-body">${rows.map(([label, score, detail, weight]) => `<article><div><strong>${label}</strong><span>${weight}</span></div><b>${score.toFixed(1)}</b><p>${detail}</p><div class="score-track"><i style="width:${score}%"></i></div></article>`).join("")}<div class="feedback-roadmap"><strong>数据回流预留</strong><p>后续接入广告曝光、点击、转化与人工确认结果后，可按渠道和人群动态校准排序权重。</p></div></div><div class="modal-foot"><button class="button button-primary" data-action="back-product-selection">返回商品清单</button></div></section></div>`;
+}
+
+function knowledgeLoadingModal() {
+  return `<div class="overlay"><section class="modal compact-modal knowledge-loading-modal" role="dialog" aria-modal="true" aria-labelledby="knowledge-loading-title"><div class="modal-head"><div><h2 id="knowledge-loading-title">知识库 Agent 正在调用资产</h2><p>正在执行意图理解、定向召回、过滤排序和覆盖校验</p></div></div><div class="knowledge-loading-body"><span></span><strong>读取本地知识资产目录…</strong><small>不会返回与当前生成形式无关的资产</small></div></section></div>`;
+}
+
+function knowledgeErrorModal(message) {
+  return `<div class="overlay"><section class="modal compact-modal" role="dialog" aria-modal="true" aria-labelledby="knowledge-error-title"><div class="modal-head"><div><h2 id="knowledge-error-title">知识资产读取失败</h2><p>${escapeHtml(message)}</p></div><button class="close-button" data-action="close-overlay">×</button></div><div class="modal-foot"><button class="button button-outline" data-action="close-overlay">返回方案</button><button class="button button-primary" data-action="retry-knowledge-agent">重新读取</button></div></section></div>`;
 }
 
 function previewModal(type) {
@@ -302,6 +328,7 @@ export function bindGeneration(type) {
     productSelectionSession.excludedIds = new Set();
     showProductSelection();
   });
+  document.querySelector('[data-action="run-knowledge-agent"]')?.addEventListener("click", () => openKnowledgeAgent(type));
   document.querySelector('[data-action="preview"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = previewModal(type); bindOverlay(); });
   document.querySelector('[data-action="parse-replica"]')?.addEventListener("click", () => {
     document.querySelector("#overlay-root").innerHTML = replicaModal(type);
@@ -355,6 +382,47 @@ function showProductSelection() {
     excludedIds: productSelectionSession.excludedIds
   });
   bindOverlay();
+}
+
+function showKnowledgeResult() {
+  const root = document.querySelector("#overlay-root");
+  if (!root || !knowledgeSession.result) return;
+  root.innerHTML = renderKnowledgeAgentModal(knowledgeSession.result, { taskType: knowledgeSession.taskType });
+  bindOverlay();
+}
+
+function rerunKnowledgeAgent() {
+  if (!knowledgeSession.input || !knowledgeSession.catalog) return;
+  knowledgeSession.result = runKnowledgeAgent({
+    ...knowledgeSession.input,
+    catalog: knowledgeSession.catalog,
+    quantityOverrides: knowledgeSession.quantityOverrides
+  });
+  showKnowledgeResult();
+}
+
+async function openKnowledgeAgent(type, forceReload = false) {
+  const root = document.querySelector("#overlay-root");
+  if (!root) return;
+  root.innerHTML = knowledgeLoadingModal();
+  const defaultSelection = filterAndRankProducts(products, { limit: 10 }).visible;
+  const selected = productSelectionSession.selectedIds.size
+    ? products.filter((item) => productSelectionSession.selectedIds.has(item.id))
+    : defaultSelection;
+  const input = buildKnowledgeAgentInput(type, selected);
+  input.requirement.channel = document.querySelector('[aria-label="渠道"]')?.value || input.requirement.channel;
+  input.requirement.brand = document.querySelector('[aria-label="品牌"]')?.value || input.requirement.brand;
+  knowledgeSession.taskType = type;
+  knowledgeSession.input = input;
+  knowledgeSession.quantityOverrides = {};
+  try {
+    if (forceReload || !knowledgeSession.catalog) knowledgeSession.catalog = await loadKnowledgeCatalog();
+    knowledgeSession.result = runKnowledgeAgent({ ...input, catalog: knowledgeSession.catalog });
+    showKnowledgeResult();
+  } catch (error) {
+    root.innerHTML = knowledgeErrorModal(error.message);
+    bindOverlay();
+  }
 }
 
 function refreshSelectedProductCount() {
@@ -436,6 +504,58 @@ function bindOverlay() {
       return;
     }
     setState({ toast: `已确认 ${count} 个商品，选品结果已写入当前任务` });
+  });
+  document.querySelector('[data-action="retry-knowledge-agent"]')?.addEventListener("click", () => openKnowledgeAgent(knowledgeSession.taskType, true));
+  document.querySelectorAll("[data-knowledge-decision]").forEach((button) => button.addEventListener("click", () => {
+    const decision = button.dataset.knowledgeDecision;
+    if (decision === "add_asset" || decision === "add_digital_human") {
+      document.querySelector("#overlay-root").innerHTML = renderKnowledgeSupplementModal(button.dataset.gapType, { digitalHumanOnly: decision === "add_digital_human" });
+      bindOverlay();
+      return;
+    }
+    if (decision === "continue_with_gap") {
+      setState({ toast: "已记录运营决策：接受资产缺口并继续生产" });
+      return;
+    }
+    if (decision === "adjust_plan") {
+      knowledgeSession.quantityOverrides = Object.fromEntries(knowledgeSession.result.missingAssets.map((item) => [item.type, item.available]));
+      rerunKnowledgeAgent();
+    }
+  }));
+  document.querySelectorAll('[data-action="back-knowledge-result"]').forEach((button) => button.addEventListener("click", showKnowledgeResult));
+  document.querySelector('[data-action="confirm-supplement-asset"]')?.addEventListener("click", (event) => {
+    const type = event.currentTarget.dataset.gapType;
+    const name = document.querySelector('[aria-label="补充资产名称"]')?.value.trim() || `新增${type}`;
+    const tags = (document.querySelector('[aria-label="补充资产标签"]')?.value || "").split(",").map((item) => item.trim()).filter(Boolean);
+    const requirement = knowledgeSession.input.requirement;
+    knowledgeSession.catalog = [...knowledgeSession.catalog, {
+      assetId: `TEMP-${type.toUpperCase()}-${Date.now()}`,
+      name,
+      assetType: type,
+      mediaType: knowledgeSession.taskType,
+      status: "active",
+      version: "task-temp-v1",
+      filePath: `task-assets/${type}.json`,
+      fileFormat: "json",
+      fileSize: 1024,
+      checksum: `task:${type}`,
+      fileHealthy: true,
+      duplicateOf: "",
+      quality: { resolution: 90, completeness: 90 },
+      license: { status: "available", expiresAt: "2099-12-31", regions: ["CN"] },
+      brandScopes: [requirement.brand],
+      channels: [requirement.channel],
+      aspectRatios: [requirement.aspectRatio],
+      tags,
+      categories: requirement.categories.length ? requirement.categories : ["all"],
+      productIds: [],
+      owner: "本任务运营补充",
+      updatedAt: new Date().toISOString().slice(0, 10)
+    }];
+    rerunKnowledgeAgent();
+  });
+  document.querySelector('[data-action="confirm-knowledge-assets"]:not(:disabled)')?.addEventListener("click", () => {
+    setState({ toast: `已确认调用 ${knowledgeSession.result.selectedAssets.length} 个知识资产，资产快照已写入创意方案` });
   });
   document.querySelector('[data-action="change-product"]')?.addEventListener("click", () => setState({ toast: "已切换为降噪真无线耳机作为代表商品" }));
   document.querySelector('[data-action="confirm-parse"]')?.addEventListener("click", () => setState({ toast: "解析完成：3 个低置信字段已标记，右侧方案已更新" }));

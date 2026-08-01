@@ -1,0 +1,23 @@
+{
+  "group": "image",
+  "assets": [
+    {
+      "assetId": "PIMG-88310-HERO", "name": "轻薄旗舰笔记本主图", "assetType": "product_image", "mediaType": "image", "status": "active", "version": "v2.1", "filePath": "knowledge/image/itm-88310-hero.png", "fileFormat": "png", "fileSize": 1842020, "checksum": "sha256:pimg88310", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 96, "completeness": 94 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["all"], "aspectRatios": ["all"], "tags": ["数码", "商品特写", "真实"], "categories": ["电脑办公", "手机数码"], "productIds": ["ITM-88310"], "owner": "商品内容中心", "updatedAt": "2026-07-20"
+    },
+    {
+      "assetId": "PIMG-19028-LOW", "name": "降噪耳机旧版单图", "assetType": "product_image", "mediaType": "image", "status": "active", "version": "v1.0", "filePath": "knowledge/image/itm-19028-old.jpg", "fileFormat": "jpg", "fileSize": 98240, "checksum": "sha256:pimg19028", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 42, "completeness": 68 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["all"], "aspectRatios": ["all"], "tags": ["数码", "白底图"], "categories": ["手机数码"], "productIds": ["ITM-19028"], "owner": "商品内容中心", "updatedAt": "2025-11-12"
+    },
+    {
+      "assetId": "IBG-LIFE-001", "name": "真实数码生活场景背景", "assetType": "background_image", "mediaType": "image", "status": "active", "version": "v1.2", "filePath": "knowledge/image/digital-life-bg.png", "fileFormat": "png", "fileSize": 2412090, "checksum": "sha256:ibg001", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 94, "completeness": 91 }, "license": { "status": "available", "expiresAt": "2028-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流", "种草"], "aspectRatios": ["4:5", "1:1"], "tags": ["真实", "轻促销", "数码", "生活场景"], "categories": ["手机数码", "电脑办公", "智能穿戴"], "productIds": [], "owner": "创意资产中心", "updatedAt": "2026-07-16"
+    },
+    {
+      "assetId": "IBG-CHANNEL-008", "name": "频道专属科技背景", "assetType": "background_image", "mediaType": "image", "status": "active", "version": "v1.0", "filePath": "knowledge/image/channel-tech-bg.png", "fileFormat": "png", "fileSize": 2231004, "checksum": "sha256:ibg008", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 92, "completeness": 90 }, "license": { "status": "available", "expiresAt": "2028-12-31", "regions": ["CN"] }, "brandScopes": ["频道品牌"], "channels": ["信息流"], "aspectRatios": ["4:5"], "tags": ["科技", "强促销"], "categories": ["手机数码"], "productIds": [], "owner": "频道设计组", "updatedAt": "2026-06-02"
+    },
+    {
+      "assetId": "LAYOUT-FEED-405", "name": "信息流 4:5 商品主视觉版式", "assetType": "image_layout", "mediaType": "image", "status": "active", "version": "v2.4", "filePath": "knowledge/image/feed-4x5-layout.json", "fileFormat": "json", "fileSize": 18240, "checksum": "sha256:layout405", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 98, "completeness": 96 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["信息流"], "aspectRatios": ["4:5"], "tags": ["轻促销", "商品特写", "安全区"], "categories": ["all"], "productIds": [], "owner": "创意技术中心", "updatedAt": "2026-07-22"
+    },
+    {
+      "assetId": "LAYOUT-SQUARE-101", "name": "社交广场 1:1 版式", "assetType": "image_layout", "mediaType": "image", "status": "active", "version": "v1.1", "filePath": "knowledge/image/social-1x1-layout.json", "fileFormat": "json", "fileSize": 15488, "checksum": "sha256:layout101", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 95, "completeness": 93 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["社交广场"], "aspectRatios": ["1:1"], "tags": ["年轻化", "社交"], "categories": ["all"], "productIds": [], "owner": "创意技术中心", "updatedAt": "2026-05-18"
+    }
+  ]
+}

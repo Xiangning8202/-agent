@@ -1,0 +1,17 @@
+{
+  "group": "common",
+  "assets": [
+    {
+      "assetId": "LOGO-PLATFORM-001", "name": "平台标准蓝 Logo", "assetType": "brand_logo", "mediaType": "common", "status": "active", "version": "v3.0", "filePath": "knowledge/common/platform-logo-blue.svg", "fileFormat": "svg", "fileSize": 28412, "checksum": "sha256:logo001", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 100, "completeness": 98 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["all"], "aspectRatios": ["all"], "tags": ["品牌", "标准蓝", "可信"], "categories": ["all"], "productIds": ["all"], "owner": "品牌设计中心", "updatedAt": "2026-07-18"
+    },
+    {
+      "assetId": "LOGO-PLATFORM-OLD", "name": "平台旧版渐变 Logo", "assetType": "brand_logo", "mediaType": "common", "status": "expired", "version": "v1.4", "filePath": "knowledge/common/platform-logo-old.svg", "fileFormat": "svg", "fileSize": 30211, "checksum": "sha256:logo-old", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 96, "completeness": 82 }, "license": { "status": "available", "expiresAt": "2025-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["all"], "aspectRatios": ["all"], "tags": ["品牌", "旧版"], "categories": ["all"], "productIds": ["all"], "owner": "品牌设计中心", "updatedAt": "2025-01-08"
+    },
+    {
+      "assetId": "FONT-MODERN-001", "name": "现代无衬线字体", "assetType": "font", "mediaType": "common", "status": "active", "version": "v1.3", "filePath": "knowledge/common/modern-sans.woff2", "fileFormat": "woff2", "fileSize": 188420, "checksum": "sha256:font001", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 96, "completeness": 96 }, "license": { "status": "available", "expiresAt": "2099-12-31", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["all"], "aspectRatios": ["all"], "tags": ["现代", "清晰", "数码"], "categories": ["all"], "productIds": [], "owner": "品牌设计中心", "updatedAt": "2026-06-20"
+    },
+    {
+      "assetId": "FONT-DISPLAY-009", "name": "营销展示字体", "assetType": "font", "mediaType": "common", "status": "active", "version": "v1.0", "filePath": "knowledge/common/display-font.woff2", "fileFormat": "woff2", "fileSize": 212980, "checksum": "sha256:font009", "fileHealthy": true, "duplicateOf": "", "quality": { "resolution": 92, "completeness": 88 }, "license": { "status": "unavailable", "expiresAt": "2026-06-30", "regions": ["CN"] }, "brandScopes": ["平台品牌"], "channels": ["all"], "aspectRatios": ["all"], "tags": ["促销", "醒目"], "categories": ["all"], "productIds": [], "owner": "外部供应商", "updatedAt": "2026-05-11"
+    }
+  ]
+}

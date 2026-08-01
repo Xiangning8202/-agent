@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://creative-agent.local/schemas/knowledge-assets.json",
+  "title": "知识库 Agent 资产目录",
+  "type": "object",
+  "required": ["group", "assets"],
+  "properties": {
+    "group": { "type": "string", "enum": ["common", "image", "video"] },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/asset" }
+    }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": ["assetId", "name", "assetType", "mediaType", "status", "version", "filePath", "fileFormat", "fileSize", "checksum", "fileHealthy", "duplicateOf", "quality", "license", "brandScopes", "channels", "aspectRatios", "tags", "categories", "productIds", "owner", "updatedAt"],
+      "properties": {
+        "assetId": { "type": "string" },
+        "name": { "type": "string" },
+        "assetType": { "type": "string", "enum": ["product_image", "background_image", "brand_logo", "font", "image_layout", "video_template", "digital_human", "video_background", "subtitle_style", "bgm"] },
+        "mediaType": { "type": "string", "enum": ["common", "image", "video"] },
+        "status": { "type": "string", "enum": ["active", "expired", "unlisted"] },
+        "version": { "type": "string" },
+        "filePath": { "type": "string" },
+        "fileFormat": { "type": "string" },
+        "fileSize": { "type": "integer", "minimum": 0 },
+        "checksum": { "type": "string" },
+        "fileHealthy": { "type": "boolean" },
+        "duplicateOf": { "type": "string" },
+        "quality": {
+          "type": "object",
+          "required": ["resolution", "completeness"],
+          "properties": {
+            "resolution": { "type": "number", "minimum": 0, "maximum": 100 },
+            "completeness": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "license": {
+          "type": "object",
+          "required": ["status", "expiresAt", "regions"],
+          "properties": {
+            "status": { "type": "string", "enum": ["available", "unavailable"] },
+            "expiresAt": { "type": "string", "format": "date" },
+            "regions": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "brandScopes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "channels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "aspectRatios": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "categories": { "type": "array", "items": { "type": "string" } },
+        "productIds": { "type": "array", "items": { "type": "string" } },
+        "owner": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date" }
+      }
+    }
+  }
+}

@@ -12,7 +12,8 @@ const mime = {
   ".js": "text/javascript; charset=utf-8",
   ".png": "image/png",
   ".jpg": "image/jpeg",
-  ".svg": "image/svg+xml"
+  ".svg": "image/svg+xml",
+  ".json": "application/json; charset=utf-8"
 };
 
 http.createServer(async (req, res) => {

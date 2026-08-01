@@ -18,4 +18,11 @@ test("deployment worker serves the app shell and module assets", async () => {
   assert.equal(icon.status, 200);
   assert.match(icon.headers.get("content-type"), /image\/svg\+xml/);
   assert.match(await icon.text(), /^<svg[\s>]/);
+
+  const knowledge = await worker.fetch(new Request("https://example.test/src/knowledge-base/data/common-assets.json"));
+  assert.equal(knowledge.status, 200);
+  assert.match(knowledge.headers.get("content-type"), /application\/json/);
+  const knowledgeData = await knowledge.json();
+  assert.ok(Array.isArray(knowledgeData.assets));
+  assert.ok(knowledgeData.assets.length > 0);
 });
