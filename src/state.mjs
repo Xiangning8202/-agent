@@ -13,6 +13,10 @@ export const initialState = {
   topPanel: null,
   generationMode: "native",
   conversationCleared: false,
+  generationClarification: {
+    image: { lastInput: "", resolved: false, confirmed: false },
+    video: { lastInput: "", resolved: false, confirmed: false }
+  },
   taskType: "全部任务类型",
   taskMaterialType: "全部素材类型",
   taskStatus: "全部状态",

@@ -6,21 +6,92 @@ const option = (label, selected = false) => `<button type="button" class="choice
 const field = (label, value, extra = "") => `<label class="form-field"><span>${label}</span><input aria-label="${label}" value="${value}" ${extra}></label>`;
 const selectField = (label, value, options = [value]) => `<label class="form-field"><span>${label}</span><select aria-label="${label}">${options.map((item) => `<option ${item === value ? "selected" : ""}>${item}</option>`).join("")}</select></label>`;
 
+const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (character) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+}[character]));
+
+export function isAgentSubmitKey(event) {
+  return event?.key === "Enter" && !event.shiftKey && !event.isComposing;
+}
+
+export function buildRequirementClarification(type, { clarificationResolved = false } = {}) {
+  const video = type === "video";
+  const resolvedValue = (pending, resolved) => clarificationResolved ? resolved : pending;
+  const resolvedStatus = clarificationResolved ? "confirmed" : "missing";
+  const dimensions = [
+    { group: "目标与衡量", label: "业务目标", value: "优惠心智 + 点击转化", status: "known" },
+    { group: "目标与衡量", label: "核心KPI", value: "CTR优先，兼顾落地页转化", status: "inferred" },
+    { group: "人群与场景", label: "目标人群", value: resolvedValue("待补充", "18–35岁、近期浏览数码商品的价格敏感用户"), status: resolvedStatus },
+    { group: "人群与场景", label: "使用场景", value: resolvedValue("待补充", "暑期焕新、通勤与居家换机场景"), status: resolvedStatus },
+    { group: "商品与利益", label: "承接对象", value: "商品详情页", status: "known" },
+    { group: "商品与利益", label: "商品范围", value: "近期热门手机、电脑与智能穿戴", status: "known" },
+    { group: "商品与利益", label: "核心利益点", value: "限时优惠 + 品质保障", status: "inferred" },
+    { group: "商品与利益", label: "信任证据", value: resolvedValue("待补充", "平台验真、用户评价与售后保障"), status: resolvedStatus },
+    { group: "投放与规格", label: "渠道媒体", value: video ? "信息流 / 短视频媒体" : "信息流 / 效果广告媒体", status: "known" },
+    { group: "投放与规格", label: "版位与规格", value: video ? "竖版9:16，移动端安全区" : "竖版4:5，移动端信息流", status: "inferred" },
+    { group: "表达与品牌", label: "信息优先级", value: "优惠利益点 > 商品主体 > 行动引导", status: "inferred" },
+    { group: "表达与品牌", label: "品牌调性", value: "真实、可信、轻促销", status: "inferred" },
+    { group: "表达与品牌", label: "品牌资产", value: resolvedValue("待补充", "平台Logo、标准品牌蓝与商品白底图"), status: resolvedStatus },
+    { group: "执行与风险", label: "合规边界", value: "避免绝对低价、夸大功效与虚假稀缺", status: "known" },
+    { group: "执行与风险", label: "交付排期", value: resolvedValue("待补充", "活动前3个工作日完成首批交付"), status: resolvedStatus },
+    { group: "执行与风险", label: "数量与变体", value: video ? "8个商品 × 2条，共16条" : "8个商品 × 3张，共24张", status: "known" }
+  ];
+
+  if (video) {
+    dimensions.push(
+      { group: "视频制作", label: "视频时长与节奏", value: clarificationResolved ? "25秒，前3秒强Hook，中段解释，尾帧CTA" : "25秒（节奏待确认）", status: clarificationResolved ? "confirmed" : "inferred" },
+      { group: "视频制作", label: "人物与口播", value: resolvedValue("待补充", "真人手部 + 轻数字人，口播简洁可信"), status: resolvedStatus },
+      { group: "视频制作", label: "声音与字幕", value: resolvedValue("待补充", "轻快电子BGM，重点词高亮字幕"), status: resolvedStatus },
+      { group: "视频制作", label: "首帧与叙事结构", value: "价格反差Hook → 使用场景 → 权益证据 → CTA", status: "inferred" }
+    );
+  }
+
+  const questions = clarificationResolved ? [] : [
+    "核心人群是谁，处于种草、比价还是临门转化阶段？",
+    "本次活动必须表达的优惠机制和可用信任证据是什么？",
+    "有哪些必须使用或禁止使用的品牌资产、商品图和文案？",
+    "首批交付时间、素材数量和需要覆盖的版位有哪些？",
+    ...(video ? ["视频是否使用真人/数字人、口播、BGM与重点字幕？"] : [])
+  ];
+
+  return { dimensions, questions, canConfirm: questions.length === 0 };
+}
+
+function clarificationState(type, state) {
+  const current = state.generationClarification?.[type] || {};
+  return {
+    lastInput: current.lastInput || state.lastAgentInput || "",
+    resolved: current.resolved ?? state.clarificationResolved ?? false,
+    confirmed: current.confirmed ?? state.requirementConfirmed ?? false
+  };
+}
+
+function requirementMap(type, status) {
+  const model = buildRequirementClarification(type, { clarificationResolved: status.resolved });
+  const groups = [...new Set(model.dimensions.map((item) => item.group))];
+  const statusText = { known: "已明确", inferred: "已推断", missing: "待补充", confirmed: "已补充" };
+  return `<div class="understanding requirement-map">
+    <div class="clarification-title"><div><strong>需求澄清结果</strong><small>已从运营语言拆解 ${model.dimensions.length} 个维度</small></div><span class="clarification-state ${model.canConfirm ? "ready" : "pending"}">${model.canConfirm ? "信息已齐，可确认需求" : `${model.questions.length}项待补充`}</span></div>
+    <div class="requirement-groups">${groups.map((group) => `<section><h4>${group}</h4><dl>${model.dimensions.filter((item) => item.group === group).map((item) => `<div class="requirement-item ${item.status}"><dt>${item.label}<small>${statusText[item.status]}</small></dt><dd>${item.value}</dd></div>`).join("")}</dl></section>`).join("")}</div>
+    ${model.questions.length ? `<div class="followup-block"><div><strong>待补追问</strong><small>只追问会影响选品、创意或投放的缺口</small></div><ol>${model.questions.map((question) => `<li>${question}</li>`).join("")}</ol><div class="quick-replies"><button type="button" data-clarification-preset="目标人群为18–35岁价格敏感用户，主打暑期焕新场景；活动利益点是限时券和平台验真，使用平台Logo和品牌蓝，3个工作日内交付。${type === "video" ? "视频25秒，可用轻数字人、简短口播、轻快BGM和重点词字幕。" : ""}">使用建议答案</button><button type="button" data-clarification-preset="请逐项问我，我来补充。">逐项追问</button></div></div>` : `<div class="clarification-ready"><strong>信息已齐，可确认需求</strong><span>确认后冻结需求快照，并进入智能选品。</span></div>`}
+    <button type="button" class="button ${model.canConfirm ? "button-primary" : "button-outline"} confirm-requirement" data-action="confirm-requirement"${model.canConfirm ? "" : " disabled"}>${status.confirmed ? "需求已确认" : "确认需求，进入智能选品"}</button>
+  </div>`;
+}
+
 function agentPanel(type, state) {
   const isVideo = type === "video";
+  const status = clarificationState(type, state);
+  const userBrief = status.lastInput || (isVideo ? "为近期热门数码商品生成10条竖版短视频，突出优惠感。" : "为近期热门数码商品做一批信息流图片，突出优惠感和点击转化。");
   return `<section class="agent-panel">
     <div class="panel-title"><div><strong>${isVideo ? "视频创意" : "创意"} Agent</strong><span class="online-dot"></span></div><button class="text-button" data-action="clear-chat">清空会话</button></div>
     <div class="agent-steps">
-      ${["需求理解", "智能选品", isVideo ? "创意结构" : "创意方案", "预览确认", "批量任务"].map((name, index) => `<div class="${index < (isVideo ? 3 : 1) ? "done" : ""}"><span>${index + 1}</span><small>${name}</small></div>`).join("")}
+      ${["需求理解", "智能选品", isVideo ? "创意结构" : "创意方案", "预览确认", "批量任务"].map((name, index) => `<div class="${index === 0 ? (status.confirmed ? "done" : "current") : index === 1 && status.confirmed ? "current" : ""}"><span>${index + 1}</span><small>${name}</small></div>`).join("")}
     </div>
     <div class="conversation">
       ${state.conversationCleared ? `<div class="conversation-empty"><span class="bot-avatar">AI</span><div><strong>会话已清空</strong><p>输入新的投放需求即可重新开始。</p></div></div>` : `
-      <div class="message agent"><span class="bot-avatar">AI</span><div>告诉我本次投放目标、渠道和希望生成的素材方向，我会分阶段帮你确认关键需求。</div></div>
-      <div class="message user"><div>${isVideo ? "为近期热门数码商品生成10条竖版短视频，突出优惠感。" : "为近期热门数码商品做一批信息流图片，突出优惠感和点击转化。"}</div><span class="avatar small">李</span></div>
-      <div class="message agent"><span class="bot-avatar">AI</span><div class="understanding"><strong>我对需求的理解</strong>
-        <dl><dt>投放目标</dt><dd>优惠心智 + 点击转化</dd><dt>素材类型</dt><dd>${isVideo ? "竖版短视频" : "信息流图片"}</dd><dt>承接对象</dt><dd>商品</dd><dt>选品方式</dt><dd>按数码类目智能选品</dd></dl>
-        <p>已识别主要风险：避免绝对化低价表达。</p>
-      </div></div>
+      <div class="message agent"><span class="bot-avatar">AI</span><div>请直接描述投放诉求。我会先拆解已知信息、标记推断项，再只追问会阻塞生成的关键缺口。</div></div>
+      <div class="message user"><div>${escapeHtml(userBrief)}</div><span class="avatar small">李</span></div>
+      <div class="message agent clarification-message"><span class="bot-avatar">AI</span>${requirementMap(type, status)}</div>
       <div class="field-diff">
         <div><strong>Agent 建议修改 2 个字段</strong><small>确认后才会写入右侧方案</small></div>
         <div class="diff-row"><span>CTA</span><del>立即购买</del><b>立即查看</b></div>
@@ -29,8 +100,8 @@ function agentPanel(type, state) {
       </div>
       `}
     </div>
-    <div class="agent-input"><textarea aria-label="向 Agent 补充需求" placeholder="补充需求或要求 Agent 调整右侧方案…"></textarea><button class="send-button" data-action="send-agent">发送</button></div>
-    <div class="agent-context" data-testid="agent-context">Agent 当前使用：最近保存的方案</div>
+    <div class="agent-input-wrap"><div class="agent-input"><textarea data-agent-input aria-label="向 Agent 补充需求" placeholder="补充人群、场景、利益点、品牌约束、排期等信息…"></textarea><button type="button" class="send-button" data-action="send-agent">发送</button></div><div class="input-hint"><span>Enter 发送 · Shift+Enter 换行</span><span>支持直接粘贴完整投放 Brief</span></div></div>
+    <div class="agent-context" data-testid="agent-context">${status.confirmed ? "需求快照已冻结，Agent 将按确认内容继续" : "Agent 当前使用：本轮需求澄清上下文"}</div>
   </section>`;
 }
 
@@ -126,6 +197,7 @@ function summary(type) {
 
 export function renderGeneration(type, state = getState()) {
   const video = type === "video";
+  const requirementStatus = clarificationState(type, state);
   const title = video ? "视频素材生成" : "图片素材生成";
   return `${pageHeader(title, video ? "通过结构化创意与分镜脚本，生成可审核、可合成的视频广告素材" : "用自然语言描述投放诉求，Agent 将协助完成需求确认、智能选品与创意方案配置", '<button class="guide-button" data-action="guide">查看操作指南</button>')}
   <div class="mode-tabs"><button class="${state.generationMode === "native" ? "active" : ""}" data-mode="native">AI原生素材</button><button class="${state.generationMode === "replica" ? "active" : ""}" data-mode="replica">爆款复刻素材</button></div>
@@ -133,9 +205,9 @@ export function renderGeneration(type, state = getState()) {
   <div class="generation-grid">
     ${agentPanel(type, state)}
     <section class="scheme-panel">
-      <div class="panel-title"><div><strong>${video ? "AI视频方案" : "AI素材方案"}</strong>${badge("草稿 · 待确认", "orange")}</div><button class="text-button" data-action="field-help">查看字段说明</button></div>
+      <div class="panel-title"><div><strong>${video ? "AI视频方案" : "AI素材方案"}</strong>${badge(requirementStatus.confirmed ? "需求已确认" : "草稿 · 待确认", requirementStatus.confirmed ? "green" : "orange")}</div><button class="text-button" data-action="field-help">查看字段说明</button></div>
       <div class="scheme-scroll">${basicFields(type)}${landingSection()}${video ? videoScheme() : imageScheme()}</div>
-      <div class="scheme-actions"><span>需求确认后可生成预览</span><button class="button button-outline" data-action="save-draft">保存草稿</button><button class="button button-primary" data-action="preview">生成1个预览${video ? "视频" : "素材"}</button></div>
+      <div class="scheme-actions"><span>${requirementStatus.confirmed ? "需求已确认，可生成代表性预览" : "请先完成左侧追问并确认需求"}</span><button class="button button-outline" data-action="save-draft">保存草稿</button><button class="button button-primary" data-action="preview"${requirementStatus.confirmed ? "" : " disabled"}>生成1个预览${video ? "视频" : "素材"}</button></div>
       ${summary(type)}
     </section>
   </div>
@@ -167,6 +239,26 @@ function infoModal(kind) {
 }
 
 export function bindGeneration(type) {
+  const getClarification = () => getState().generationClarification || {
+    image: { lastInput: "", resolved: false, confirmed: false },
+    video: { lastInput: "", resolved: false, confirmed: false }
+  };
+  const updateClarification = (patch, extraState = {}) => {
+    const all = getClarification();
+    setState({ ...extraState, generationClarification: { ...all, [type]: { ...all[type], ...patch } } });
+  };
+  const submitAgentMessage = () => {
+    const input = document.querySelector("[data-agent-input]");
+    const value = input?.value.trim() || "";
+    if (!value) {
+      setState({ toast: "请先输入需要补充的需求信息" });
+      return;
+    }
+    updateClarification(
+      { lastInput: value, resolved: true, confirmed: false },
+      { conversationCleared: false, toast: "补充信息已拆解，需求现在可以确认" }
+    );
+  };
   document.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => setState({ generationMode: button.dataset.mode })));
   document.querySelector('[data-action="save-draft"]')?.addEventListener("click", () => saveDraft(type, { title: document.querySelector('[aria-label="任务名称"]')?.value, saved: true }));
   document.querySelector('[data-action="manage-products"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = productModal(); bindOverlay(); });
@@ -176,8 +268,32 @@ export function bindGeneration(type) {
     bindOverlay();
   });
   document.querySelector('[data-action="apply-diff"]')?.addEventListener("click", () => setState({ toast: "已应用 2 项 Agent 修改" }));
-  document.querySelector('[data-action="send-agent"]')?.addEventListener("click", () => setState({ conversationCleared: false, toast: "Agent 已收到补充需求，正在生成字段差异" }));
-  document.querySelector('[data-action="clear-chat"]')?.addEventListener("click", () => setState({ conversationCleared: true, toast: "会话已清空，可重新输入需求" }));
+  document.querySelector('[data-action="send-agent"]')?.addEventListener("click", submitAgentMessage);
+  document.querySelector("[data-agent-input]")?.addEventListener("keydown", (event) => {
+    if (!isAgentSubmitKey(event)) return;
+    event.preventDefault();
+    submitAgentMessage();
+  });
+  document.querySelectorAll("[data-clarification-preset]").forEach((button) => button.addEventListener("click", () => {
+    const input = document.querySelector("[data-agent-input]");
+    if (!input) return;
+    input.value = button.dataset.clarificationPreset || "";
+    input.focus();
+  }));
+  document.querySelector('[data-action="confirm-requirement"]')?.addEventListener("click", () => {
+    const current = getClarification()[type] || {};
+    if (!current.resolved) {
+      setState({ toast: "还有关键信息待补充，请先回答追问" });
+      return;
+    }
+    updateClarification({ confirmed: true }, { toast: "需求已确认并冻结，正在进入智能选品" });
+  });
+  document.querySelector('[data-action="clear-chat"]')?.addEventListener("click", () => {
+    updateClarification(
+      { lastInput: "", resolved: false, confirmed: false },
+      { conversationCleared: true, toast: "会话已清空，可重新输入需求" }
+    );
+  });
   document.querySelector('[data-action="guide"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = infoModal("guide"); bindOverlay(); });
   document.querySelector('[data-action="field-help"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = infoModal("fields"); bindOverlay(); });
   document.querySelector('[data-action="confirm-style"]')?.addEventListener("click", () => setState({ toast: "视频风格已确认，Agent 将按商品自动分配" }));
