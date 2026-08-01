@@ -13,11 +13,41 @@ export const partnerNav = [
   ["partner-downloads", "下载记录", "./src/assets/icons/download.svg"]
 ];
 
+const productCandidate = (id, name, category, reason, match, material, data, overrides = {}) => ({
+  id, name, category, reason, origin: "agent", status: "active", duplicateOf: "", blacklisted: false,
+  imageCount: 6, descriptionLength: 96,
+  match: { channel: match[0], audience: match[1] },
+  material: { image: material[0], description: material[1], category: material[2] },
+  data: { sales: data[0], exposure: data[1], clicks: data[2] },
+  ...overrides
+});
+
 export const products = [
-  { id: "ITM-88310", name: "轻薄旗舰笔记本", category: "电脑办公", reason: "近期点击表现高，优惠表达空间充足", origin: "agent" },
-  { id: "ITM-19028", name: "降噪真无线耳机", category: "手机数码", reason: "视觉辨识度高，适合细节特写", origin: "agent" },
-  { id: "ITM-77214", name: "智能运动手表", category: "手机数码", reason: "功能演示明确，适合短视频媒介", origin: "agent" },
-  { id: "ITM-66509", name: "微单相机套机", category: "数码影像", reason: "客单价高，优惠利益点突出", origin: "manual" }
+  productCandidate("ITM-88310", "轻薄旗舰笔记本", "电脑办公", "高意向人群近期点击与成交同步上升", [96, 94], [94, 90, 96], [93, 91, 95]),
+  productCandidate("ITM-19028", "降噪真无线耳机", "手机数码", "通勤人群匹配高，细节素材与口碑数据完整", [94, 96], [95, 88, 94], [91, 94, 96]),
+  productCandidate("ITM-77214", "智能运动手表", "智能穿戴", "暑期运动场景契合，功能演示素材丰富", [93, 95], [92, 93, 95], [89, 93, 94]),
+  productCandidate("ITM-66509", "微单相机套机", "数码影像", "高客单优惠利益点突出，点击质量稳定", [91, 88], [96, 90, 92], [92, 88, 91], { origin: "manual" }),
+  productCandidate("ITM-42861", "学生平板电脑 11英寸", "电脑办公", "开学换新场景匹配，商品信息与素材完备", [92, 93], [91, 92, 94], [88, 91, 90]),
+  productCandidate("ITM-57342", "便携蓝牙音箱", "手机数码", "户外聚会场景相关，短视频完播表现较好", [88, 91], [90, 87, 91], [86, 92, 90]),
+  productCandidate("ITM-90416", "游戏机械键盘", "电脑办公", "年轻游戏人群匹配，灯效图片可形成强视觉", [90, 94], [93, 86, 90], [87, 89, 92]),
+  productCandidate("ITM-34628", "主动降噪头戴耳机", "手机数码", "通勤与学习场景兼容，点击率高于类目均值", [89, 92], [92, 89, 91], [85, 90, 94]),
+  productCandidate("ITM-71853", "4K高清运动相机", "数码影像", "旅行人群兴趣匹配，场景素材数量充足", [88, 90], [94, 88, 92], [84, 89, 91]),
+  productCandidate("ITM-25179", "智能健康手环", "智能穿戴", "入门价格带适合拉新，曝光点击数据稳定", [91, 90], [88, 90, 93], [90, 91, 88]),
+  productCandidate("ITM-63285", "电竞显示器 27英寸", "电脑办公", "游戏用户兴趣明确，核心参数描述完整", [87, 91], [91, 94, 90], [89, 86, 90]),
+  productCandidate("ITM-14796", "磁吸无线充电宝", "手机数码", "差旅即时需求强，商品卖点易于短链路表达", [90, 89], [89, 91, 92], [88, 90, 87]),
+  productCandidate("ITM-80934", "护眼阅读台灯", "智能家居", "学生与居家办公人群覆盖广，销售趋势良好", [85, 89], [90, 92, 88], [91, 87, 86]),
+  productCandidate("ITM-49517", "手机稳定器云台", "数码影像", "内容创作者人群高度匹配，演示素材可用性高", [89, 93], [92, 85, 89], [83, 88, 92]),
+  productCandidate("ITM-38642", "智能翻译录音笔", "电脑办公", "学习与差旅场景清晰，搜索点击持续增长", [86, 88], [87, 93, 90], [85, 89, 91]),
+  productCandidate("ITM-92751", "家用高清投影仪", "智能家居", "暑期居家娱乐契合，曝光和加购表现突出", [86, 91], [93, 89, 88], [90, 92, 85]),
+  productCandidate("ITM-56473", "开放式运动耳机", "智能穿戴", "运动人群匹配，佩戴场景图片覆盖完整", [88, 92], [90, 88, 91], [84, 87, 90]),
+  productCandidate("ITM-21368", "迷你办公主机", "电脑办公", "桌面焕新场景明确，参数与类目信息规范", [84, 87], [89, 92, 93], [86, 85, 88]),
+  productCandidate("ITM-75129", "智能门锁可视猫眼版", "智能家居", "家庭安全诉求明确，主站成交质量稳定", [82, 86], [91, 90, 89], [91, 84, 86]),
+  productCandidate("ITM-60837", "便携照片打印机", "数码影像", "年轻女性与旅行场景匹配，素材风格丰富", [87, 90], [93, 87, 86], [82, 86, 89]),
+  productCandidate("ITM-OLD-01", "已下架旗舰手机", "手机数码", "历史热销但当前不可售", [95, 95], [94, 94, 94], [96, 96, 96], { status: "expired" }),
+  productCandidate("ITM-DUP-01", "轻薄旗舰笔记本重复链接", "电脑办公", "同SPU重复召回", [92, 92], [90, 90, 90], [90, 90, 90], { duplicateOf: "ITM-88310" }),
+  productCandidate("ITM-LOW-01", "入门数据线单图商品", "手机数码", "素材不足", [78, 80], [30, 42, 80], [72, 70, 68], { imageCount: 1 }),
+  productCandidate("ITM-LOW-02", "简版手机支架", "手机数码", "标描信息不足", [80, 77], [72, 28, 82], [71, 69, 66], { descriptionLength: 22 }),
+  productCandidate("ITM-BLK-01", "风险品牌蓝牙耳机", "手机数码", "命中业务黑名单", [90, 90], [90, 90, 90], [90, 90, 90], { blacklisted: true })
 ];
 
 export const tasks = [
