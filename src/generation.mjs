@@ -90,14 +90,19 @@ function workflowState(type, state) {
     productCount: current.productCount ?? 0,
     knowledgeConfirmed: current.knowledgeConfirmed ?? false,
     knowledgeCount: current.knowledgeCount ?? 0,
-    acceptedKnowledgeGap: current.acceptedKnowledgeGap ?? false
+    acceptedKnowledgeGap: current.acceptedKnowledgeGap ?? false,
+    creativeConfirmed: current.creativeConfirmed ?? false,
+    previewConfirmed: current.previewConfirmed ?? false
   };
 }
 
-function workflowConfirmationCards(status, workflow) {
+function workflowConfirmationCards(type, status, workflow) {
   if (!status.confirmed) return "";
   const productState = !status.confirmed ? "locked" : workflow.productConfirmed ? "confirmed" : "pending";
   const knowledgeState = !status.confirmed || !workflow.productConfirmed ? "locked" : workflow.knowledgeConfirmed ? "confirmed" : "pending";
+  const creativeState = workflow.creativeConfirmed ? "confirmed" : "pending";
+  const previewState = workflow.previewConfirmed ? "confirmed" : "pending";
+  const creativeName = type === "video" ? "视频创意结构" : "图片创意方案";
   const productTitle = !status.confirmed
     ? "选品排序等待需求确认"
     : workflow.productConfirmed ? `已确认 ${workflow.productCount} 个商品` : "选品排序待运营确认";
@@ -112,6 +117,18 @@ function workflowConfirmationCards(status, workflow) {
     ${workflow.productConfirmed ? `<article class="workflow-confirmation ${knowledgeState}" data-workflow-confirmation="knowledge">
       <div class="workflow-confirmation-head"><span>3</span><div><strong>${knowledgeTitle}</strong><small>${workflow.knowledgeConfirmed ? `${workflow.acceptedKnowledgeGap ? "已记录接受缺口的运营决策" : "资产快照已写入创意方案"}` : "按已确认商品召回、过滤、排序并校验资产数量与类型"}</small></div><em>${knowledgeState === "confirmed" ? "已确认" : knowledgeState === "pending" ? "待确认" : "未开始"}</em></div>
       <button type="button" class="button ${knowledgeState === "pending" ? "button-primary" : "button-outline"}" data-action="run-knowledge-agent"${workflow.productConfirmed ? "" : " disabled"}>${!workflow.productConfirmed ? "请先确认选品" : workflow.knowledgeConfirmed ? "重新查看资产" : "调用并确认知识资产"}</button>
+    </article>` : ""}
+    ${workflow.knowledgeConfirmed ? `<article class="workflow-confirmation ${creativeState}" data-workflow-confirmation="creative">
+      <div class="workflow-confirmation-head"><span>4</span><div><strong>${workflow.creativeConfirmed ? `已确认${creativeName}` : `${creativeName}待运营确认`}</strong><small>${workflow.creativeConfirmed ? "当前方案快照已冻结，可生成代表性预览" : "请核对右侧结构化方案、分镜与组件配置后确认"}</small></div><em>${workflow.creativeConfirmed ? "已确认" : "待确认"}</em></div>
+      <button type="button" class="button ${creativeState === "pending" ? "button-primary" : "button-outline"}" data-action="confirm-creative">${workflow.creativeConfirmed ? `重新确认${creativeName}` : `确认${creativeName}`}</button>
+    </article>` : ""}
+    ${workflow.creativeConfirmed ? `<article class="workflow-confirmation ${previewState}" data-workflow-confirmation="preview">
+      <div class="workflow-confirmation-head"><span>5</span><div><strong>${workflow.previewConfirmed ? "代表性预览已确认" : "预览素材待运营确认"}</strong><small>${workflow.previewConfirmed ? "预览检查结果已写入当前任务" : "生成 1 个代表素材，检查利益点、品牌安全区与合规风险"}</small></div><em>${workflow.previewConfirmed ? "已确认" : "待确认"}</em></div>
+      <button type="button" class="button ${previewState === "pending" ? "button-primary" : "button-outline"}" data-action="preview">${workflow.previewConfirmed ? "重新查看预览" : "生成预览并确认"}</button>
+    </article>` : ""}
+    ${workflow.previewConfirmed ? `<article class="workflow-confirmation pending" data-workflow-confirmation="batch">
+      <div class="workflow-confirmation-head"><span>6</span><div><strong>批量任务待创建</strong><small>前置确认已完成，创建后可在任务进度中查看生成与审核状态</small></div><em>待创建</em></div>
+      <button type="button" class="button button-primary" data-action="create-batch">创建批量任务</button>
     </article>` : ""}
   </div>`;
 }
@@ -132,7 +149,7 @@ function agentPanel(type, state) {
   const isVideo = type === "video";
   const status = clarificationState(type, state);
   const workflow = workflowState(type, state);
-  const currentStep = !status.confirmed ? 0 : !workflow.productConfirmed ? 1 : !workflow.knowledgeConfirmed ? 2 : 3;
+  const currentStep = !status.confirmed ? 0 : !workflow.productConfirmed ? 1 : !workflow.knowledgeConfirmed ? 2 : !workflow.creativeConfirmed ? 3 : !workflow.previewConfirmed ? 4 : 5;
   const userBrief = status.lastInput || (isVideo ? "为近期热门数码商品生成10条竖版短视频，突出优惠感。" : "为近期热门数码商品做一批信息流图片，突出优惠感和点击转化。");
   return `<section class="agent-panel">
     <div class="panel-title"><div><strong>${isVideo ? "视频创意" : "创意"} Agent</strong><span class="online-dot"></span></div><button class="text-button" data-action="clear-chat">清空会话</button></div>
@@ -150,7 +167,7 @@ function agentPanel(type, state) {
         <div class="diff-row"><span>画面氛围</span><del>强促销</del><b>真实、轻促销</b></div>
         <button class="button button-soft" data-action="apply-diff">应用全部修改</button>
       </div>
-      ${workflowConfirmationCards(status, workflow)}
+      ${workflowConfirmationCards(type, status, workflow)}
       `}
     </div>
     <div class="agent-input-wrap"><div class="agent-input"><textarea data-agent-input aria-label="向 Agent 补充需求" placeholder="补充人群、场景、利益点、品牌约束、排期等信息…"></textarea><button type="button" class="send-button" data-action="send-agent">发送</button></div><div class="input-hint"><span>Enter 发送 · Shift+Enter 换行</span><span>支持直接粘贴完整投放 Brief</span></div></div>
@@ -253,7 +270,8 @@ export function renderGeneration(type, state = getState()) {
   const video = type === "video";
   const requirementStatus = clarificationState(type, state);
   const workflow = workflowState(type, state);
-  const workflowReady = requirementStatus.confirmed && workflow.productConfirmed && workflow.knowledgeConfirmed;
+  const knowledgeReady = requirementStatus.confirmed && workflow.productConfirmed && workflow.knowledgeConfirmed;
+  const previewReady = knowledgeReady && workflow.creativeConfirmed;
   const title = video ? "视频素材生成" : "图片素材生成";
   return `${pageHeader(title, video ? "通过结构化创意与分镜脚本，生成可审核、可合成的视频广告素材" : "用自然语言描述投放诉求，Agent 将协助完成需求确认、智能选品与创意方案配置", '<button class="guide-button" data-action="guide">查看操作指南</button>')}
   <div class="mode-tabs"><button class="${state.generationMode === "native" ? "active" : ""}" data-mode="native">AI原生素材</button><button class="${state.generationMode === "replica" ? "active" : ""}" data-mode="replica">爆款复刻素材</button></div>
@@ -263,7 +281,7 @@ export function renderGeneration(type, state = getState()) {
     <section class="scheme-panel">
       <div class="panel-title"><div><strong>${video ? "AI视频方案" : "AI素材方案"}</strong>${badge(requirementStatus.confirmed ? "需求已确认" : "草稿 · 待确认", requirementStatus.confirmed ? "green" : "orange")}</div><button class="text-button" data-action="field-help">查看字段说明</button></div>
       <div class="scheme-scroll">${basicFields(type)}${landingSection(workflow)}${video ? videoScheme() : imageScheme()}</div>
-      <div class="scheme-actions"><span>${workflowReady ? "需求、选品和知识资产均已确认，可生成代表性预览" : !requirementStatus.confirmed ? "请先完成左侧追问并确认需求" : !workflow.productConfirmed ? "请在左侧确认选品排序" : "请在左侧确认知识资产"}</span><button class="button button-outline" data-action="save-draft">保存草稿</button><button class="button button-primary" data-action="preview"${workflowReady ? "" : " disabled"}>生成1个预览${video ? "视频" : "素材"}</button></div>
+      <div class="scheme-actions"><span>${workflow.previewConfirmed ? "预览已确认，请在左侧创建批量任务" : previewReady ? "创意方案已确认，可生成代表性预览" : !requirementStatus.confirmed ? "请先完成左侧追问并确认需求" : !workflow.productConfirmed ? "请在左侧确认选品排序" : !workflow.knowledgeConfirmed ? "请在左侧确认知识资产" : "请在左侧确认创意方案"}</span><button class="button button-outline" data-action="save-draft">保存草稿</button><button class="button button-primary" data-action="preview"${previewReady ? "" : " disabled"}>生成1个预览${video ? "视频" : "素材"}</button></div>
       ${summary(type)}
     </section>
   </div>
@@ -322,7 +340,7 @@ function previewModal(type) {
   const video = type === "video";
   return `<div class="overlay"><section class="modal preview-modal" role="dialog" aria-modal="true" aria-labelledby="preview-title"><div class="modal-head"><div><h2 id="preview-title">${video ? "视频" : "图片"}预览素材</h2><p>Agent 推荐代表商品：轻薄旗舰笔记本，可在生成前更换</p></div><button class="close-button" data-action="close-overlay">×</button></div>
     <div class="preview-body"><img src="${imageUrl(video ? "./src/assets/eval-images/IMG-005.png" : "./src/assets/eval-images/IMG-012.png", 900, 560)}" alt="代表商品预览素材"><div class="preview-notes"><strong>预览检查</strong><ul><li>优惠利益点表达清楚</li><li>Logo 位于媒体安全区</li><li>未发现绝对化低价表达</li></ul>${badge("预计通过率 87%", "green")}</div></div>
-    <div class="modal-foot"><button class="button button-outline" data-action="change-product">更换代表商品</button><button class="button button-outline" data-action="close-overlay">返回修改方案</button><button class="button button-primary" data-action="start-batch">确认预览并开始批量任务</button></div></section></div>`;
+    <div class="modal-foot"><button class="button button-outline" data-action="change-product">更换代表商品</button><button class="button button-outline" data-action="close-overlay">返回修改方案</button><button class="button button-primary" data-action="confirm-preview" data-preview-type="${type}">确认预览，进入批量任务</button></div></section></div>`;
 }
 
 function replicaModal(type) {
@@ -368,7 +386,7 @@ export function bindGeneration(type) {
     showProductSelection();
   }));
   document.querySelectorAll('[data-action="run-knowledge-agent"]:not(:disabled)').forEach((button) => button.addEventListener("click", () => openKnowledgeAgent(type)));
-  document.querySelector('[data-action="preview"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = previewModal(type); bindOverlay(); });
+  document.querySelectorAll('[data-action="preview"]:not(:disabled)').forEach((button) => button.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = previewModal(type); bindOverlay(); }));
   document.querySelector('[data-action="parse-replica"]')?.addEventListener("click", () => {
     document.querySelector("#overlay-root").innerHTML = replicaModal(type);
     bindOverlay();
@@ -395,7 +413,7 @@ export function bindGeneration(type) {
     const all = getState().generationWorkflow || {};
     updateClarification({ confirmed: true }, {
       toast: "需求已确认并冻结，请运营确认 Agent 选品排序",
-      generationWorkflow: { ...all, [type]: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false } }
+      generationWorkflow: { ...all, [type]: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false, creativeConfirmed: false, previewConfirmed: false } }
     });
   });
   document.querySelector('[data-action="clear-chat"]')?.addEventListener("click", () => {
@@ -407,6 +425,15 @@ export function bindGeneration(type) {
   document.querySelector('[data-action="guide"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = infoModal("guide"); bindOverlay(); });
   document.querySelector('[data-action="field-help"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = infoModal("fields"); bindOverlay(); });
   document.querySelector('[data-action="confirm-style"]')?.addEventListener("click", () => setState({ toast: "视频风格已确认，Agent 将按商品自动分配" }));
+  document.querySelector('[data-action="confirm-creative"]')?.addEventListener("click", () => {
+    const state = getState();
+    const all = state.generationWorkflow || {};
+    setState({
+      generationWorkflow: { ...all, [type]: { ...workflowState(type, state), creativeConfirmed: true, previewConfirmed: false } },
+      toast: `${type === "video" ? "视频创意结构" : "图片创意方案"}已确认，请生成代表性预览`
+    });
+  });
+  document.querySelector('[data-action="create-batch"]')?.addEventListener("click", () => setState({ route: "tasks", toast: "批量任务已创建，可在任务进度中查看" }));
   document.querySelector('[data-action="toggle-storyboard"]')?.addEventListener("click", (event) => {
     const storyboard = document.querySelector("[data-storyboard]");
     storyboard?.classList.toggle("collapsed");
@@ -502,7 +529,16 @@ function downloadProductSelection() {
 
 function bindOverlay() {
   document.querySelectorAll('[data-action="close-overlay"]').forEach((button) => button.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = ""; }));
-  document.querySelector('[data-action="start-batch"]')?.addEventListener("click", () => setState({ route: "tasks", toast: "批量任务已创建，可在任务进度中查看" }));
+  document.querySelector('[data-action="confirm-preview"]')?.addEventListener("click", (event) => {
+    const type = event.currentTarget.dataset.previewType === "video" ? "video" : "image";
+    const state = getState();
+    const all = state.generationWorkflow || {};
+    document.querySelector("#overlay-root").innerHTML = "";
+    setState({
+      generationWorkflow: { ...all, [type]: { ...workflowState(type, state), previewConfirmed: true } },
+      toast: "代表性预览已确认，请创建批量任务"
+    });
+  });
   document.querySelectorAll("[data-product-limit]").forEach((button) => button.addEventListener("click", () => {
     productSelectionSession.limit = Number(button.dataset.productLimit) === 20 ? 20 : 10;
     const result = filterAndRankProducts(products, { limit: productSelectionSession.limit, query: productSelectionSession.query, excludedIds: productSelectionSession.excludedIds });
@@ -554,7 +590,7 @@ function bindOverlay() {
     const state = getState();
     const all = state.generationWorkflow || {};
     setState({
-      generationWorkflow: { ...all, [type]: { ...workflowState(type, state), productConfirmed: true, productCount: count, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false } },
+      generationWorkflow: { ...all, [type]: { ...workflowState(type, state), productConfirmed: true, productCount: count, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false, creativeConfirmed: false, previewConfirmed: false } },
       toast: `已确认 ${count} 个商品，请继续确认知识资产`
     });
   });
@@ -572,7 +608,7 @@ function bindOverlay() {
       const state = getState();
       const all = state.generationWorkflow || {};
       setState({
-        generationWorkflow: { ...all, [type]: { ...workflowState(type, state), knowledgeConfirmed: true, knowledgeCount: count, acceptedKnowledgeGap: true } },
+        generationWorkflow: { ...all, [type]: { ...workflowState(type, state), knowledgeConfirmed: true, knowledgeCount: count, acceptedKnowledgeGap: true, creativeConfirmed: false, previewConfirmed: false } },
         toast: "已记录运营决策：接受资产缺口并继续生产"
       });
       return;
@@ -620,7 +656,7 @@ function bindOverlay() {
     const state = getState();
     const all = state.generationWorkflow || {};
     setState({
-      generationWorkflow: { ...all, [type]: { ...workflowState(type, state), knowledgeConfirmed: true, knowledgeCount: count, acceptedKnowledgeGap: false } },
+      generationWorkflow: { ...all, [type]: { ...workflowState(type, state), knowledgeConfirmed: true, knowledgeCount: count, acceptedKnowledgeGap: false, creativeConfirmed: false, previewConfirmed: false } },
       toast: `已确认调用 ${count} 个知识资产，资产快照已写入创意方案`
     });
   });

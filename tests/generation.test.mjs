@@ -107,7 +107,8 @@ test("left Agent requires operator confirmation for product ranking and knowledg
     generationWorkflow: { image: { productConfirmed: true, productCount: 10, knowledgeConfirmed: true, knowledgeCount: 5 } }
   });
   assert.match(workflowConfirmed, /已确认 5 个知识资产/);
-  assert.match(workflowConfirmed, /data-action="preview"(?! disabled)/);
+  assert.match(workflowConfirmed, /data-workflow-confirmation="creative"/);
+  assert.match(workflowConfirmed, /data-action="preview" disabled/);
 });
 
 test("operator confirmations stay in chat order and reveal only reached stages", () => {
@@ -132,4 +133,47 @@ test("operator confirmations stay in chat order and reveal only reached stages",
   const confirmedProductIndex = productConfirmed.indexOf('data-workflow-confirmation="product"');
   const knowledgeIndex = productConfirmed.indexOf('data-workflow-confirmation="knowledge"');
   assert.ok(confirmedProductIndex >= 0 && confirmedProductIndex < knowledgeIndex, "knowledge confirmation should follow the completed product step");
+});
+
+test("creative, preview and batch confirmations appear progressively after knowledge assets", () => {
+  const base = {
+    generationMode: "native",
+    generationClarification: { video: { resolved: true, confirmed: true } },
+    generationWorkflow: {
+      video: {
+        productConfirmed: true,
+        productCount: 10,
+        knowledgeConfirmed: true,
+        knowledgeCount: 9,
+        creativeConfirmed: false,
+        previewConfirmed: false
+      }
+    }
+  };
+
+  const creativePending = renderGeneration("video", base);
+  assert.match(creativePending, /data-workflow-confirmation="creative"/);
+  assert.match(creativePending, /确认视频创意结构/);
+  assert.doesNotMatch(creativePending, /data-workflow-confirmation="preview"/);
+  assert.doesNotMatch(creativePending, /data-workflow-confirmation="batch"/);
+  assert.match(creativePending, /data-action="preview" disabled/);
+
+  const previewPending = renderGeneration("video", {
+    ...base,
+    generationWorkflow: { video: { ...base.generationWorkflow.video, creativeConfirmed: true } }
+  });
+  assert.match(previewPending, /data-workflow-confirmation="preview"/);
+  assert.match(previewPending, /生成预览并确认/);
+  assert.doesNotMatch(previewPending, /data-workflow-confirmation="batch"/);
+  assert.match(previewPending, /data-action="preview"(?! disabled)/);
+
+  const batchPending = renderGeneration("video", {
+    ...base,
+    generationWorkflow: { video: { ...base.generationWorkflow.video, creativeConfirmed: true, previewConfirmed: true } }
+  });
+  const creativeIndex = batchPending.indexOf('data-workflow-confirmation="creative"');
+  const previewIndex = batchPending.indexOf('data-workflow-confirmation="preview"');
+  const batchIndex = batchPending.indexOf('data-workflow-confirmation="batch"');
+  assert.ok(creativeIndex >= 0 && creativeIndex < previewIndex && previewIndex < batchIndex, "steps 4, 5 and 6 should stay in chronological order");
+  assert.match(batchPending, /data-action="create-batch"/);
 });
