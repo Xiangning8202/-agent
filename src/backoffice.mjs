@@ -1,6 +1,6 @@
 import { accounts, assets, knowledgeRows } from "./data.mjs";
 import { badge, imageUrl, metric, pageHeader } from "./ui.mjs";
-import { setState } from "./state.mjs";
+import { getState, setState } from "./state.mjs";
 
 const statusTone = (status) => status === "有效" || status === "正常" ? "green" : status.includes("冻结") || status.includes("失效") ? "red" : "orange";
 
@@ -39,18 +39,80 @@ function knowledgeDrawer() {
     </div><div class="drawer-foot"><button class="button button-outline" data-action="copy-knowledge">复制资产</button><button class="button button-primary" data-action="save-knowledge">保存修改并升版</button></div></aside></div>`;
 }
 
-const bars = (values, color = "blue") => `<div class="bar-chart" aria-label="指标趋势">${values.map((value, index) => `<div><span style="height:${value}%;--bar:${color}"></span><small>${index + 1}日</small></div>`).join("")}</div>`;
+const ANALYTICS_DATES = ["07-05", "07-06", "07-07", "07-08", "07-09", "07-10", "07-11", "07-12", "07-13", "07-14", "07-15", "07-16", "07-17", "07-18"];
+const ANALYTICS_SERIES = {
+  adoption: { label: "采用率", color: "#1768ff", values: [32.4, 34.1, 33.8, 35.2, 36.7, 35.9, 37.1, 36.5, 38.2, 37.8, 39.1, 38.6, 40.2, 41.4], format: (value) => `${value.toFixed(1)}%` },
+  runout: { label: "跑出率", color: "#11a87b", values: [8.6, 9.1, 9.4, 9.8, 10.1, 10.4, 10.8, 10.6, 11.1, 11.5, 11.8, 12.1, 12.5, 12.8], format: (value) => `${value.toFixed(1)}%` },
+  ctr: { label: "CTR", color: "#7a5af8", values: [2.86, 2.94, 3.02, 3.11, 3.08, 3.19, 3.24, 3.18, 3.31, 3.36, 3.42, 3.51, 3.47, 3.58], format: (value) => `${value.toFixed(2)}%` },
+  cpa: { label: "总CPA", color: "#f59e0b", values: [49.8, 48.6, 48.1, 47.4, 46.8, 46.2, 45.7, 45.1, 44.8, 44.2, 43.9, 43.4, 42.9, 42.6], format: (value) => `¥${value.toFixed(1)}` }
+};
+
+const splitMetric = (total) => {
+  const first = Math.round(total * .39);
+  const second = Math.round(total * .34);
+  return [first, second, total - first - second];
+};
+
+function analyticsAssetRows(state = {}) {
+  const type = state.analyticsType || state.assetType || "全部";
+  const channel = state.analyticsChannel || "全部渠道";
+  const media = state.analyticsMedia || "全部媒体";
+  return assets.map((asset, index) => {
+    const spend = Number(String(asset.spend).replace(/[^0-9.]/g, "")) || 10000 + index * 700;
+    const ctr = Number(String(asset.ctr).replace(/[^0-9.]/g, "")) || 3;
+    const impressions = 318000 + index * 27400;
+    const clicks = Math.round(impressions * ctr / 100);
+    return { asset, date: ANALYTICS_DATES[Math.max(0, ANALYTICS_DATES.length - 1 - index)], spend, spendParts: splitMetric(spend), impressions, impressionParts: splitMetric(impressions), clicks };
+  }).filter(({ asset }) => (type === "全部" || asset.type === type) && (channel === "全部渠道" || asset.channel === channel) && (media === "全部媒体" || asset.media === media));
+}
+
+const formatInteger = (value) => Math.round(value).toLocaleString("en-US");
+const selectOptions = (values, selected) => values.map((value) => `<option ${value === selected ? "selected" : ""}>${value}</option>`).join("");
+
+function bars(metricKey, range) {
+  const series = ANALYTICS_SERIES[metricKey] || ANALYTICS_SERIES.adoption;
+  const count = range === "近7天" ? 7 : ANALYTICS_DATES.length;
+  const dates = ANALYTICS_DATES.slice(-count);
+  const values = series.values.slice(-count);
+  const max = Math.max(...values);
+  return `<div class="bar-chart" aria-label="${series.label}趋势">${values.map((value, index) => {
+    const formatted = series.format(value);
+    const height = Math.max(18, Math.round(value / max * 78));
+    return `<div data-chart-point="${dates[index]}" aria-label="${dates[index]} · ${formatted}"><b data-chart-value="${formatted}">${formatted}</b><span title="${dates[index]} · ${formatted}" style="height:${height}%;--bar:${series.color}"></span><small>${dates[index]}</small></div>`;
+  }).join("")}</div>`;
+}
+
+export function buildAnalyticsCsv(state = {}) {
+  const header = ["素材ID", "类型", "渠道", "媒体", "消耗", "曝光", "点击", "CTR", "CPA"];
+  const rows = analyticsAssetRows(state).map(({ asset, spend, impressions, clicks }) => [asset.id, asset.type, asset.channel, asset.media, Math.round(spend), impressions, clicks, asset.ctr, asset.cpa]);
+  const escapeCsv = (value) => /[",\n]/.test(String(value)) ? `"${String(value).replaceAll('"', '""')}"` : String(value);
+  return `\ufeff${[header, ...rows].map((row) => row.map(escapeCsv).join(",")).join("\n")}`;
+}
+
+export function buildAnalyticsFilterPatch({ channel, media, range, start, end } = {}) {
+  return {
+    analyticsChannel: channel || "全部渠道",
+    analyticsMedia: media || "全部媒体",
+    analyticsRange: range || "近30天",
+    analyticsStart: start || "2025-07-05",
+    analyticsEnd: end || "2025-07-18"
+  };
+}
 
 export function renderAnalytics(state = {}) {
-  const selectedType = state.assetType || "全部";
-  const rows = assets.filter((asset) => selectedType === "全部" || asset.type === selectedType).slice(0, 5);
+  const selectedType = state.analyticsType || state.assetType || "全部";
+  const selectedChannel = state.analyticsChannel || "全部渠道";
+  const selectedMedia = state.analyticsMedia || "全部媒体";
+  const selectedRange = state.analyticsRange || "近30天";
+  const selectedMetric = state.analyticsMetric || "adoption";
+  const rows = analyticsAssetRows({ ...state, analyticsType: selectedType }).slice(0, 8);
   return `${pageHeader("素材数据", "观察素材生产效率与投放表现，数据按日更新，不做单一创意因子归因", '<span class="updated">数据更新至 2025-07-18 10:00</span>')}
-  <div class="toolbar floating">${["全部","图片","视频"].map((type) => `<button class="filter-chip ${selectedType === type ? "active" : ""}" data-analytics-type="${type}">${type}</button>`).join("")}<select><option>全部渠道</option><option>信息流</option><option>DSP</option><option>种草</option><option>厂商</option></select><select><option>全部媒体</option><option>抖音</option><option>快手</option><option>腾讯广告</option><option>巨量引擎</option><option>百度</option></select><select><option>近30天</option><option>近7天</option><option>自定义</option></select><button class="button button-primary" data-action="analytics-query">查询</button></div>
+  <div class="toolbar floating">${["全部","图片","视频"].map((type) => `<button class="filter-chip ${selectedType === type ? "active" : ""}" data-analytics-type="${type}">${type}</button>`).join("")}<select data-analytics-filter="channel" aria-label="数据渠道">${selectOptions(["全部渠道", "信息流", "DSP", "种草", "厂商"], selectedChannel)}</select><select data-analytics-filter="media" aria-label="数据媒体">${selectOptions(["全部媒体", "抖音", "快手", "腾讯广告", "巨量引擎", "百度"], selectedMedia)}</select><select data-analytics-filter="range" aria-label="数据日期范围">${selectOptions(["近30天", "近7天", "自定义"], selectedRange)}</select>${selectedRange === "自定义" ? `<input type="date" aria-label="开始日期" data-analytics-filter="start" value="${state.analyticsStart || "2025-07-05"}"><input type="date" aria-label="结束日期" data-analytics-filter="end" value="${state.analyticsEnd || "2025-07-18"}">` : ""}<button class="button button-primary" data-action="analytics-query">查询</button><button class="button button-outline" data-action="analytics-reset">重置</button></div>
   <div class="metric-grid six">${metric("采用率", "38.6%", "较前30天 +4.2%", "red")}${metric("跑出率", "12.8%", "较前30天 +1.3%", "red")}${metric("点击率", "3.42%", "较前30天 +0.28%", "red")}${metric("总CPA", "¥42.6", "较前30天 -8.6%", "green")}${metric("审核通过率", "87.4%", "较前30天 +2.1%", "red")}${metric("首次采用耗时", "1.8天", "较前30天 -0.3天", "green")}</div>
-  <div class="analytics-grid"><section class="chart-panel"><div class="section-title"><strong>核心指标趋势</strong><div>${badge("采用率", "blue")} 跑出率 CTR 总CPA</div></div>${bars([46,38,54,43,51,48,57,61,55,69,49,58,62,54],"#1768ff")}</section>
+  <div class="analytics-grid"><section class="chart-panel"><div class="section-title"><div><strong>核心指标趋势</strong><small>${selectedRange} · 每日回流值</small></div><div class="analytics-metric-tabs">${Object.entries(ANALYTICS_SERIES).map(([key, series]) => `<button data-analytics-metric="${key}" class="analytics-metric-tab ${selectedMetric === key ? "active" : ""}">${series.label}</button>`).join("")}</div></div>${bars(selectedMetric, selectedRange)}</section>
     <section class="comparison-panel"><h3>图片 / 视频效果对比</h3><div class="compare-row"><span class="type-icon">图</span><strong>图片</strong><div><small>采用率</small><b>41.2%</b></div><div><small>跑出率</small><b>13.6%</b></div><div><small>样本量</small><b>842张</b></div>${badge("样本充足","green")}</div><div class="compare-row"><span class="type-icon">视</span><strong>视频</strong><div><small>采用率</small><b>32.9%</b></div><div><small>跑出率</small><b>10.4%</b></div><div><small>样本量</small><b>383条</b></div>${badge("样本充足","green")}</div></section></div>
   <section class="data-panel analytics-table"><div class="section-title"><strong>单素材数据</strong><button class="button button-outline" data-action="export-analytics">导出</button></div><table class="data-table"><thead><tr><th>日期</th><th>素材预览</th><th>素材ID</th><th>类型</th><th>渠道/媒体</th><th>消耗（总/U1/U2/U3）</th><th>曝光（总/U1/U2/U3）</th><th>点击</th><th>CTR</th><th>U总CPA</th><th>采用状态</th><th>跑出状态</th><th>样本状态</th></tr></thead><tbody>
-  ${rows.length ? rows.map((asset) => `<tr><td>07-18</td><td><img class="tiny-thumb" src="${imageUrl(asset.source || asset.seed, 100, 64)}" alt="${asset.title}"></td><td><button class="row-link" data-action="analytics-detail" data-analytics-asset="${asset.id}">${asset.id}</button></td><td>${asset.type}</td><td>${asset.channel}/${asset.media}</td><td>18,442 / 7,201 / 6,189 / 5,052</td><td>562k / 210k / 188k / 164k</td><td>20,351</td><td>${asset.ctr}</td><td>${asset.cpa}</td><td>${badge("已采用","green")}</td><td>${badge("已跑出","green")}</td><td>${badge("样本充足","blue")}</td></tr>`).join("") : '<tr><td colspan="13" class="table-empty">暂无匹配素材数据</td></tr>'}</tbody></table></section><div id="overlay-root"></div>`;
+  ${rows.length ? rows.map(({ asset, date, spend, spendParts, impressions, impressionParts, clicks }) => `<tr data-analytics-row="${asset.id}" data-channel="${asset.channel}" data-media="${asset.media}"><td>${date}</td><td><img class="tiny-thumb" src="${imageUrl(asset.source || asset.seed, 100, 64)}" alt="${asset.title}"></td><td><button class="row-link" data-action="analytics-detail" data-analytics-asset="${asset.id}">${asset.id}</button></td><td>${asset.type}</td><td>${asset.channel}/${asset.media}</td><td>${[spend, ...spendParts].map(formatInteger).join(" / ")}</td><td>${[impressions, ...impressionParts].map(formatInteger).join(" / ")}</td><td>${formatInteger(clicks)}</td><td>${asset.ctr}</td><td>${asset.cpa}</td><td>${badge("已采用","green")}</td><td>${badge("已跑出","green")}</td><td>${badge("样本充足","blue")}</td></tr>`).join("") : '<tr><td colspan="13" class="table-empty">暂无匹配素材数据</td></tr>'}</tbody></table></section><div id="overlay-root"></div>`;
 }
 
 const accountApplications = [
@@ -104,10 +166,35 @@ export function renderPartnerDownloads() {
   return `${pageHeader("下载记录", "查看当前账号的历史素材下载记录")}<section class="data-panel"><table class="data-table"><thead><tr><th>下载时间</th><th>素材ID</th><th>素材名称</th><th>类型</th><th>媒体</th><th>下载方式</th></tr></thead><tbody>${assets.slice(0,5).map((asset,index) => `<tr><td>2025-07-${18-index} 14:${32-index*3}</td><td>${asset.id}</td><td>${asset.title}</td><td>${asset.type}</td><td>${asset.media}</td><td>单素材下载</td></tr>`).join("")}</tbody></table></section>`;
 }
 
+function downloadAnalyticsCsv() {
+  const url = URL.createObjectURL(new Blob([buildAnalyticsCsv(getState())], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "素材数据回流.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function analyticsFilterPatchFromDom() {
+  return buildAnalyticsFilterPatch({
+    channel: document.querySelector('[data-analytics-filter="channel"]')?.value,
+    media: document.querySelector('[data-analytics-filter="media"]')?.value,
+    range: document.querySelector('[data-analytics-filter="range"]')?.value,
+    start: document.querySelector('[data-analytics-filter="start"]')?.value,
+    end: document.querySelector('[data-analytics-filter="end"]')?.value
+  });
+}
+
 export function bindBackoffice(route) {
   document.querySelectorAll("[data-knowledge]").forEach((button) => button.addEventListener("click", () => setState({ knowledgeType: button.dataset.knowledge, knowledgeCategory: 0 })));
   document.querySelectorAll("[data-knowledge-category]").forEach((button) => button.addEventListener("click", () => setState({ knowledgeCategory: Number(button.dataset.knowledgeCategory) })));
-  document.querySelectorAll("[data-analytics-type], [data-partner-type]").forEach((button) => button.addEventListener("click", () => setState({ assetType: button.dataset.analyticsType || button.dataset.partnerType })));
+  document.querySelectorAll("[data-analytics-type]").forEach((button) => button.addEventListener("click", () => setState({ analyticsType: button.dataset.analyticsType })));
+  document.querySelectorAll("[data-partner-type]").forEach((button) => button.addEventListener("click", () => setState({ assetType: button.dataset.partnerType })));
+  document.querySelectorAll("[data-analytics-metric]").forEach((button) => button.addEventListener("click", () => setState({ analyticsMetric: button.dataset.analyticsMetric })));
+  document.querySelector('[data-analytics-filter="range"]')?.addEventListener("change", () => setState(analyticsFilterPatchFromDom()));
+  document.querySelector('[data-action="analytics-query"]')?.addEventListener("click", () => setState({ ...analyticsFilterPatchFromDom(), toast: "数据筛选条件已应用" }));
+  document.querySelector('[data-action="analytics-reset"]')?.addEventListener("click", () => setState({ analyticsType: "全部", analyticsChannel: "全部渠道", analyticsMedia: "全部媒体", analyticsRange: "近30天", analyticsMetric: "adoption", toast: "数据筛选已重置" }));
+  document.querySelector('[data-action="export-analytics"]')?.addEventListener("click", () => { downloadAnalyticsCsv(); setState({ toast: "素材数据 CSV 已导出" }); });
   document.querySelectorAll("[data-account-tab]").forEach((button) => button.addEventListener("click", () => setState({ accountTab: button.dataset.accountTab })));
   document.querySelectorAll('[data-action="edit-knowledge"], [data-action="new-knowledge"]').forEach((button) => button.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = knowledgeDrawer(); bindDrawer(); }));
   document.querySelector('[data-action="new-partner"]')?.addEventListener("click", () => { document.querySelector("#overlay-root").innerHTML = partnerDrawer(); bindDrawer(); });
@@ -125,8 +212,6 @@ export function bindBackoffice(route) {
   const actionMessages = {
     "import-knowledge": "已打开知识资产导入流程",
     "export-knowledge": "知识资产清单已导出",
-    "analytics-query": "数据筛选条件已应用",
-    "export-analytics": "素材数据已导出",
     "account-query": "账号筛选条件已应用",
     "approve-account": "员工申请已通过",
     "reject-account": "员工申请已驳回"

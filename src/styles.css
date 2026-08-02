@@ -392,8 +392,15 @@ td { padding: 10px; border-top: 1px solid var(--line); color: #34425d; font-size
 .chart-panel, .comparison-panel { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: white; }
 .section-title { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
 .chart-panel .section-title { padding: 0 0 14px; }
+.chart-panel .section-title > div:first-child strong, .chart-panel .section-title > div:first-child small { display: block; }
+.chart-panel .section-title > div:first-child small { margin-top: 4px; color: var(--muted); font-size: 10px; }
+.analytics-metric-tabs { display: flex; gap: 5px; }
+.analytics-metric-tab { padding: 5px 9px; border: 1px solid var(--line); border-radius: 99px; color: #5a6880; background: white; font-size: 10px; cursor: pointer; }
+.analytics-metric-tab:hover { border-color: #9bb9f5; color: var(--blue); }
+.analytics-metric-tab.active { border-color: var(--blue); color: white; background: var(--blue); }
 .bar-chart { height: 240px; display: flex; align-items: flex-end; gap: 10px; padding: 18px 12px 0; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .bar-chart > div { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 7px; }
+.bar-chart b { color: var(--navy); font-size: 9px; white-space: nowrap; }
 .bar-chart span { width: 72%; min-width: 8px; border-radius: 4px 4px 0 0; background: var(--bar); opacity: .82; }
 .bar-chart small { color: var(--muted); font-size: 9px; }
 .comparison-panel h3 { margin: 0 0 14px; }
