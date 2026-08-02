@@ -73,6 +73,54 @@ test("generation flow hands structured demand and selected products to the knowl
   assert.deepEqual(imageInput.products, selectedProducts);
 });
 
+test("task orchestration Agent merges requirement, products and assets into a generation-ready creative Brief", () => {
+  assert.equal(typeof generation.buildTaskOrchestrationBrief, "function");
+  const result = generation.buildTaskOrchestrationBrief({
+    taskType: "video",
+    requirement: {
+      objective: "提升点击转化",
+      audience: "18–35岁价格敏感数码用户",
+      channel: "信息流",
+      aspectRatio: "9:16",
+      styleTags: ["真实", "轻促销", "快节奏"],
+      compliance: ["避免绝对低价"]
+    },
+    products: [{ id: "ITM-88310", name: "轻薄旗舰笔记本", category: "电脑办公", reason: "高意向人群点击增长" }],
+    assets: [{ assetId: "VTPL-HOOK-001", name: "Hook-场景-利益-CTA 竖版模板", assetType: "video_template", version: "v2.1", filePath: "knowledge/video/hook-benefit-cta.json" }]
+  });
+
+  assert.equal(result.status, "ready_for_generation");
+  assert.equal(result.targetAgent, "text_to_video_agent");
+  assert.deepEqual(result.sourceSummary, { requirements: 1, products: 1, assets: 1 });
+  assert.equal(result.creativeBrief.audience, "18–35岁价格敏感数码用户");
+  assert.equal(result.creativeBrief.productStrategy[0].productId, "ITM-88310");
+  assert.equal(result.generationPayload.assetReferences[0].assetId, "VTPL-HOOK-001");
+  assert.match(result.generationPayload.prompt, /提升点击转化/);
+  assert.match(result.generationPayload.prompt, /轻薄旗舰笔记本/);
+});
+
+test("generation page exposes the orchestration handoff only after knowledge assets are confirmed", () => {
+  const beforeKnowledge = renderGeneration("image", {
+    generationMode: "native",
+    generationClarification: { image: { resolved: true, confirmed: true } },
+    generationWorkflow: { image: { productConfirmed: true, productCount: 10, knowledgeConfirmed: false } }
+  });
+  assert.doesNotMatch(beforeKnowledge, /data-task-orchestration-brief/);
+
+  const afterKnowledge = renderGeneration("image", {
+    generationMode: "native",
+    generationClarification: { image: { resolved: true, confirmed: true } },
+    generationWorkflow: { image: { productConfirmed: true, productCount: 10, knowledgeConfirmed: true, knowledgeCount: 5 } }
+  });
+  assert.match(afterKnowledge, /data-task-orchestration-brief/);
+  assert.match(afterKnowledge, /任务编排 Agent/);
+  assert.match(afterKnowledge, /需求快照/);
+  assert.match(afterKnowledge, /选品信息/);
+  assert.match(afterKnowledge, /知识资产包/);
+  assert.match(afterKnowledge, /结构化创意 Brief/);
+  assert.match(afterKnowledge, /文生图 Agent/);
+});
+
 test("image and video generation expose the knowledge asset step and trigger", () => {
   for (const type of ["image", "video"]) {
     const html = renderGeneration(type, state);
@@ -153,7 +201,7 @@ test("creative, preview and batch confirmations appear progressively after knowl
 
   const creativePending = renderGeneration("video", base);
   assert.match(creativePending, /data-workflow-confirmation="creative"/);
-  assert.match(creativePending, /确认视频创意结构/);
+  assert.match(creativePending, /确认 Brief 并交给文生视频 Agent/);
   assert.doesNotMatch(creativePending, /data-workflow-confirmation="preview"/);
   assert.doesNotMatch(creativePending, /data-workflow-confirmation="batch"/);
   assert.match(creativePending, /data-action="preview" disabled/);

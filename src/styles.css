@@ -198,6 +198,24 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .scheme-section { padding: 13px 16px; border-bottom: 1px solid var(--line); }
 .scheme-section h3 { display: flex; align-items: center; justify-content: space-between; margin: 0 0 12px; font-size: 14px; }
 .scheme-section h3 small { color: var(--muted); font-weight: 400; }
+.orchestration-brief { background: linear-gradient(135deg, #f7faff 0%, #f5fbf8 100%); }
+.orchestration-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) 20px minmax(150px, 1.15fr); gap: 8px; align-items: stretch; }
+.orchestration-flow article { padding: 10px; border: 1px solid #d8e2f2; border-radius: 9px; background: white; }
+.orchestration-flow article.output { border-color: #9fc9ba; background: #effaf5; }
+.orchestration-flow span, .orchestration-flow strong, .orchestration-flow small { display: block; }
+.orchestration-flow span { color: var(--blue); font-size: 9px; font-weight: 800; text-transform: uppercase; }
+.orchestration-flow strong { margin-top: 3px; color: var(--navy); font-size: 12px; }
+.orchestration-flow small { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.orchestration-flow > i { display: grid; place-items: center; color: var(--success); font-style: normal; font-weight: 900; }
+.brief-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 9px; }
+.brief-summary-grid article { padding: 9px 10px; border-radius: 8px; background: #edf3ff; }
+.brief-summary-grid article.wide { grid-column: 1 / -1; }
+.brief-summary-grid span, .brief-summary-grid strong { display: block; }
+.brief-summary-grid span { color: var(--muted); font-size: 9px; }
+.brief-summary-grid strong { margin-top: 3px; color: var(--navy); font-size: 11px; line-height: 1.5; }
+.agent-handoff { display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: center; margin-top: 9px; padding: 9px 11px; border-radius: 8px; color: #0f5d48; background: #dff5eb; font-size: 10px; }
+.agent-handoff span, .agent-handoff b { font-size: 11px; }
+.agent-handoff i { color: #426c60; font-style: normal; text-align: center; }
 .form-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 10px; }
 .form-grid.five { grid-template-columns: 1.2fr .8fr .9fr .7fr .7fr .8fr; }
 .form-field { display: grid; gap: 6px; min-width: 0; color: #5e6a80; font-size: 12px; }

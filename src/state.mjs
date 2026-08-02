@@ -18,8 +18,8 @@ export const initialState = {
     video: { lastInput: "", resolved: false, confirmed: false }
   },
   generationWorkflow: {
-    image: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false, creativeConfirmed: false, previewConfirmed: false },
-    video: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false, creativeConfirmed: false, previewConfirmed: false }
+    image: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false, orchestrationBrief: null, creativeConfirmed: false, previewConfirmed: false },
+    video: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false, orchestrationBrief: null, creativeConfirmed: false, previewConfirmed: false }
   },
   taskType: "全部任务类型",
   taskMaterialType: "全部素材类型",
