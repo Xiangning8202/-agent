@@ -95,6 +95,7 @@ function workflowState(type, state) {
 }
 
 function workflowConfirmationCards(status, workflow) {
+  if (!status.confirmed) return "";
   const productState = !status.confirmed ? "locked" : workflow.productConfirmed ? "confirmed" : "pending";
   const knowledgeState = !status.confirmed || !workflow.productConfirmed ? "locked" : workflow.knowledgeConfirmed ? "confirmed" : "pending";
   const productTitle = !status.confirmed
@@ -108,10 +109,10 @@ function workflowConfirmationCards(status, workflow) {
       <div class="workflow-confirmation-head"><span>2</span><div><strong>${productTitle}</strong><small>${workflow.productConfirmed ? "排序清单已写入当前任务；调整商品后需重新确认知识资产" : "Agent 完成召回、过滤与综合排序后，需要运营确认最终 Top10/Top20"}</small></div><em>${productState === "confirmed" ? "已确认" : productState === "pending" ? "待确认" : "未开始"}</em></div>
       <button type="button" class="button ${productState === "pending" ? "button-primary" : "button-outline"}" data-action="manage-products"${status.confirmed ? "" : " disabled"}>${!status.confirmed ? "请先确认需求" : workflow.productConfirmed ? "重新查看排序" : "查看排序并确认"}</button>
     </article>
-    <article class="workflow-confirmation ${knowledgeState}" data-workflow-confirmation="knowledge">
+    ${workflow.productConfirmed ? `<article class="workflow-confirmation ${knowledgeState}" data-workflow-confirmation="knowledge">
       <div class="workflow-confirmation-head"><span>3</span><div><strong>${knowledgeTitle}</strong><small>${workflow.knowledgeConfirmed ? `${workflow.acceptedKnowledgeGap ? "已记录接受缺口的运营决策" : "资产快照已写入创意方案"}` : "按已确认商品召回、过滤、排序并校验资产数量与类型"}</small></div><em>${knowledgeState === "confirmed" ? "已确认" : knowledgeState === "pending" ? "待确认" : "未开始"}</em></div>
       <button type="button" class="button ${knowledgeState === "pending" ? "button-primary" : "button-outline"}" data-action="run-knowledge-agent"${workflow.productConfirmed ? "" : " disabled"}>${!workflow.productConfirmed ? "请先确认选品" : workflow.knowledgeConfirmed ? "重新查看资产" : "调用并确认知识资产"}</button>
-    </article>
+    </article>` : ""}
   </div>`;
 }
 
@@ -140,17 +141,16 @@ function agentPanel(type, state) {
     </div>
     <div class="conversation">
       ${state.conversationCleared ? `<div class="conversation-empty"><span class="bot-avatar">AI</span><div><strong>会话已清空</strong><p>输入新的投放需求即可重新开始。</p></div></div>` : `
-      ${status.confirmed ? workflowConfirmationCards(status, workflow) : ""}
       <div class="message agent"><span class="bot-avatar">AI</span><div>请直接描述投放诉求。我会先拆解已知信息、标记推断项，再只追问会阻塞生成的关键缺口。</div></div>
       <div class="message user"><div>${escapeHtml(userBrief)}</div><span class="avatar small">李</span></div>
       <div class="message agent clarification-message"><span class="bot-avatar">AI</span>${requirementMap(type, status)}</div>
-      ${status.confirmed ? "" : workflowConfirmationCards(status, workflow)}
       <div class="field-diff">
         <div><strong>Agent 建议修改 2 个字段</strong><small>确认后才会写入右侧方案</small></div>
         <div class="diff-row"><span>CTA</span><del>立即购买</del><b>立即查看</b></div>
         <div class="diff-row"><span>画面氛围</span><del>强促销</del><b>真实、轻促销</b></div>
         <button class="button button-soft" data-action="apply-diff">应用全部修改</button>
       </div>
+      ${workflowConfirmationCards(status, workflow)}
       `}
     </div>
     <div class="agent-input-wrap"><div class="agent-input"><textarea data-agent-input aria-label="向 Agent 补充需求" placeholder="补充人群、场景、利益点、品牌约束、排期等信息…"></textarea><button type="button" class="send-button" data-action="send-agent">发送</button></div><div class="input-hint"><span>Enter 发送 · Shift+Enter 换行</span><span>支持直接粘贴完整投放 Brief</span></div></div>

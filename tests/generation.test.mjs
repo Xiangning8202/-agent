@@ -92,8 +92,6 @@ test("left Agent requires operator confirmation for product ranking and knowledg
   assert.match(productPending, /data-workflow-confirmation="product"/);
   assert.match(productPending, /选品排序待运营确认/);
   assert.match(productPending, /查看排序并确认/);
-  assert.match(productPending, /data-workflow-confirmation="knowledge"/);
-  assert.match(productPending, /请先确认选品/);
   assert.match(productPending, /data-action="run-knowledge-agent" disabled/);
 
   const productConfirmed = renderGeneration("image", {
@@ -110,4 +108,28 @@ test("left Agent requires operator confirmation for product ranking and knowledg
   });
   assert.match(workflowConfirmed, /已确认 5 个知识资产/);
   assert.match(workflowConfirmed, /data-action="preview"(?! disabled)/);
+});
+
+test("operator confirmations stay in chat order and reveal only reached stages", () => {
+  const requirementConfirmed = {
+    generationMode: "native",
+    generationClarification: { image: { resolved: true, confirmed: true } },
+    generationWorkflow: { image: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0 } }
+  };
+  const productPending = renderGeneration("image", requirementConfirmed);
+  const requirementIndex = productPending.indexOf('data-action="confirm-requirement"');
+  const productIndex = productPending.indexOf('data-workflow-confirmation="product"');
+  const fieldDiffIndex = productPending.indexOf('class="field-diff"');
+
+  assert.ok(requirementIndex >= 0 && requirementIndex < productIndex, "product confirmation should follow the requirement conversation");
+  assert.ok(fieldDiffIndex < productIndex, "the active confirmation should be the latest item in the chronological chat flow");
+  assert.doesNotMatch(productPending, /data-workflow-confirmation="knowledge"/, "future confirmation stages should stay hidden");
+
+  const productConfirmed = renderGeneration("image", {
+    ...requirementConfirmed,
+    generationWorkflow: { image: { productConfirmed: true, productCount: 10, knowledgeConfirmed: false, knowledgeCount: 0 } }
+  });
+  const confirmedProductIndex = productConfirmed.indexOf('data-workflow-confirmation="product"');
+  const knowledgeIndex = productConfirmed.indexOf('data-workflow-confirmation="knowledge"');
+  assert.ok(confirmedProductIndex >= 0 && confirmedProductIndex < knowledgeIndex, "knowledge confirmation should follow the completed product step");
 });
