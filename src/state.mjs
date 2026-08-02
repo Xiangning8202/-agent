@@ -17,6 +17,10 @@ export const initialState = {
     image: { lastInput: "", resolved: false, confirmed: false },
     video: { lastInput: "", resolved: false, confirmed: false }
   },
+  generationWorkflow: {
+    image: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false },
+    video: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0, acceptedKnowledgeGap: false }
+  },
   taskType: "全部任务类型",
   taskMaterialType: "全部素材类型",
   taskStatus: "全部状态",

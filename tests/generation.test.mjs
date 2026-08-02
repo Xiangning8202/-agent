@@ -81,3 +81,33 @@ test("image and video generation expose the knowledge asset step and trigger", (
     assert.match(html, /调用知识库 Agent/);
   }
 });
+
+test("left Agent requires operator confirmation for product ranking and knowledge assets in order", () => {
+  const requirementConfirmed = {
+    generationMode: "native",
+    generationClarification: { image: { resolved: true, confirmed: true } },
+    generationWorkflow: { image: { productConfirmed: false, productCount: 0, knowledgeConfirmed: false, knowledgeCount: 0 } }
+  };
+  const productPending = renderGeneration("image", requirementConfirmed);
+  assert.match(productPending, /data-workflow-confirmation="product"/);
+  assert.match(productPending, /选品排序待运营确认/);
+  assert.match(productPending, /查看排序并确认/);
+  assert.match(productPending, /data-workflow-confirmation="knowledge"/);
+  assert.match(productPending, /请先确认选品/);
+  assert.match(productPending, /data-action="run-knowledge-agent" disabled/);
+
+  const productConfirmed = renderGeneration("image", {
+    ...requirementConfirmed,
+    generationWorkflow: { image: { productConfirmed: true, productCount: 10, knowledgeConfirmed: false, knowledgeCount: 0 } }
+  });
+  assert.match(productConfirmed, /已确认 10 个商品/);
+  assert.match(productConfirmed, /知识资产待运营确认/);
+  assert.match(productConfirmed, /data-action="run-knowledge-agent"(?! disabled)/);
+
+  const workflowConfirmed = renderGeneration("image", {
+    ...requirementConfirmed,
+    generationWorkflow: { image: { productConfirmed: true, productCount: 10, knowledgeConfirmed: true, knowledgeCount: 5 } }
+  });
+  assert.match(workflowConfirmed, /已确认 5 个知识资产/);
+  assert.match(workflowConfirmed, /data-action="preview"(?! disabled)/);
+});
